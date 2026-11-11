@@ -1,0 +1,3 @@
+# src/app/(admin)/admin/attendance
+
+Placeholder directory for Phase 1+ implementation.

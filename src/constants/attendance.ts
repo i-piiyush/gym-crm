@@ -1,0 +1,5 @@
+export const ATTENDANCE_RADIUS_METERS = 50;
+export const MAX_GPS_ACCURACY_METERS = 50;
+export const QR_WINDOW_SECONDS = 15;
+export const GEOLOCATION_TIMEOUT_MS = 10000;
+

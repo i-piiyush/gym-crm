@@ -1,0 +1,304 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -----------------------------------------------------------------------------
+// ENUMS
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  TRAINER
+  CUSTOMER
+}
+
+enum GymStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+}
+
+enum CustomerStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum PaymentProviderType {
+  DEMO
+  RAZORPAY
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  FAILED
+  REFUNDED
+}
+
+enum DeliveryChannel {
+  EMAIL
+  DOWNLOAD
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum SalaryStatus {
+  PAID
+  PENDING
+}
+
+// -----------------------------------------------------------------------------
+// MODELS
+// -----------------------------------------------------------------------------
+
+model Gym {
+  id                     String    @id @default(cuid())
+  name                   String
+  ownerUserId            String?
+  pendingOwnerEmail      String?   // Pending gym owner invitation email
+  address                String
+  latitude               Decimal   @db.Decimal(9, 6)
+  longitude              Decimal   @db.Decimal(9, 6)
+  attendanceRadiusMeters Int       @default(50) // Configurable ONLY by SUPER_ADMIN
+  timezone               String    @default("Asia/Kolkata")
+  maxCustomers           Int       @default(50)
+  status                 GymStatus @default(ACTIVE)
+  receiptPrefix          String    @default("REC")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  // Tenant Relations
+  users             User[]
+  invitations       Invitation[]
+  membershipPlans   MembershipPlan[]
+  payments          Payment[]
+  receiptCounters   ReceiptCounter[]
+  receiptDeliveries ReceiptDelivery[]
+  salaryRecords     SalaryRecord[]
+  attendances       Attendance[]
+
+  @@index([status])
+  @@index([pendingOwnerEmail])
+}
+
+model User {
+  id        String     @id @default(cuid())
+  clerkId   String     @unique
+  email     String     @unique
+  name      String
+  phone     String?
+  role      UserRole
+  gymId     String?
+  status    UserStatus @default(INVITED)
+  createdAt DateTime   @default(now())
+
+  // Relations
+  gym                      Gym?              @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  trainerProfile           TrainerProfile?
+  customerProfile          CustomerProfile?
+  assignedCustomers        CustomerProfile[] @relation("TrainerToCustomers")
+  attendances              Attendance[]
+  invitationsCreated       Invitation[]      @relation("InvitedByUser")
+
+  @@index([gymId])
+  @@index([role])
+  @@index([status])
+  @@index([email])
+}
+
+model Invitation {
+  id                String           @id @default(cuid())
+  gymId             String
+  email             String
+  role              UserRole
+  clerkInvitationId String?          @unique
+  status            InvitationStatus @default(PENDING)
+  invitedById       String
+  createdAt         DateTime         @default(now())
+
+  // Relations
+  gym       Gym  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  invitedBy User @relation("InvitedByUser", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([gymId])
+  @@index([email])
+  @@index([status])
+}
+
+model TrainerProfile {
+  userId        String         @id
+  monthlySalary Decimal        @db.Decimal(10, 2)
+  salaryDueDay  Int            @default(1) // Day of month (1-28)
+  joinedAt      DateTime       @default(now())
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  salaryRecords SalaryRecord[]
+}
+
+model CustomerProfile {
+  userId          String         @id
+  trainerId       String
+  planId          String?
+  membershipStart DateTime?
+  membershipEnd   DateTime?
+  status          CustomerStatus @default(TRIAL)
+  trialDays       Int?
+  trialEndsAt     DateTime?
+
+  // Relations
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainer  User            @relation("TrainerToCustomers", fields: [trainerId], references: [id], onDelete: Restrict)
+  plan     MembershipPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  payments Payment[]
+
+  @@index([trainerId])
+  @@index([planId])
+  @@index([status])
+  @@index([membershipEnd])
+  @@index([trialEndsAt])
+}
+
+model MembershipPlan {
+  id           String   @id @default(cuid())
+  gymId        String
+  name         String
+  durationDays Int
+  price        Decimal  @db.Decimal(10, 2)
+  isActive     Boolean  @default(true)
+
+  // Relations
+  gym              Gym               @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  customerProfiles CustomerProfile[]
+  payments         Payment[]
+
+  @@index([gymId])
+  @@index([isActive])
+}
+
+model ReceiptCounter {
+  id         String   @id @default(cuid())
+  gymId      String
+  year       Int
+  lastNumber Int      @default(0)
+
+  // Relations
+  gym        Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@unique([gymId, year])
+  @@index([gymId])
+}
+
+model Payment {
+  id                String              @id @default(cuid())
+  gymId             String
+  customerId        String
+  planId            String?
+  amount            Decimal             @db.Decimal(10, 2)
+  provider          PaymentProviderType
+  status            PaymentStatus       @default(PAID)
+  providerPaymentId String?
+  receiptNumber     String              // Formatted: {receiptPrefix}-{YYYY}-{00001}
+  paidAt            DateTime            @default(now())
+
+  // Relations
+  gym               Gym                 @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  customer          CustomerProfile     @relation(fields: [customerId], references: [userId], onDelete: Cascade)
+  plan              MembershipPlan?     @relation(fields: [planId], references: [id], onDelete: SetNull)
+  receiptDeliveries ReceiptDelivery[]
+
+  @@unique([gymId, receiptNumber])
+  @@index([gymId])
+  @@index([customerId])
+  @@index([paidAt])
+  @@index([status])
+}
+
+model ReceiptDelivery {
+  id           String          @id @default(cuid())
+  gymId        String
+  paymentId    String
+  channel      DeliveryChannel
+  status       DeliveryStatus  @default(PENDING)
+  toEmail      String?
+  errorMessage String?
+  attempts     Int             @default(0)
+  sentAt       DateTime?
+  createdAt    DateTime        @default(now())
+
+  // Relations
+  gym     Gym     @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([gymId])
+  @@index([paymentId])
+  @@index([status])
+}
+
+model SalaryRecord {
+  id        String       @id @default(cuid())
+  gymId     String
+  trainerId String
+  month     String       // Format YYYY-MM
+  amount    Decimal      @db.Decimal(10, 2) // Snapshotted from trainerProfile.monthlySalary
+  status    SalaryStatus @default(PENDING)
+  paidAt    DateTime?
+
+  // Relations
+  gym     Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  trainer TrainerProfile @relation(fields: [trainerId], references: [userId], onDelete: Cascade)
+
+  @@unique([trainerId, month])
+  @@index([gymId])
+  @@index([status])
+  @@index([month])
+}
+
+model Attendance {
+  id             String   @id @default(cuid())
+  gymId          String
+  userId         String
+  date           String   // Gym-local YYYY-MM-DD
+  checkInAt      DateTime @default(now())
+  latitude       Decimal  @db.Decimal(9, 6)
+  longitude      Decimal  @db.Decimal(9, 6)
+  accuracyMeters Decimal  @db.Decimal(7, 2)
+  distanceMeters Decimal  @db.Decimal(7, 2)
+  ipAddress      String?  // Audit only (no geofencing via IP)
+  flagged        Boolean  @default(false)
+  flagReason     String?
+
+  // Relations
+  gym  Gym  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([gymId])
+  @@index([gymId, date])
+  @@index([userId])
+  @@index([checkInAt])
+}
