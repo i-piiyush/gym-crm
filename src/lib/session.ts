@@ -14,6 +14,8 @@ export interface PortalSession {
   role: UserRoleType;
   gymId: string | null;
   gymName?: string;
+  timezone?: string;
+  maxCustomers?: number;
 }
 
 /**
@@ -35,7 +37,7 @@ export const getPortalSession = cache(
       where: { clerkId: userId },
       include: {
         gym: {
-          select: { name: true, status: true },
+          select: { name: true, status: true, timezone: true, maxCustomers: true },
         },
       },
     });
@@ -50,7 +52,7 @@ export const getPortalSession = cache(
         where: { clerkId: userId },
         include: {
           gym: {
-            select: { name: true, status: true },
+            select: { name: true, status: true, timezone: true, maxCustomers: true },
           },
         },
       });
@@ -72,6 +74,8 @@ export const getPortalSession = cache(
       role: user.role as UserRoleType,
       gymId: user.gymId,
       gymName: user.gym?.name,
+      timezone: user.gym?.timezone,
+      maxCustomers: user.gym?.maxCustomers,
     };
   }
 );

@@ -13,17 +13,30 @@ export default async function HomePage() {
 
   if (userId) {
     let userRole: string | null = null;
-    const existing = await prisma.user.findUnique({
-      where: { clerkId: userId },
-      select: { role: true, status: true },
-    });
 
-    if (existing && existing.status === "ACTIVE" && existing.role) {
-      userRole = existing.role;
-    } else {
-      const sync = await syncUserFromClerk(userId);
-      if (sync.user) {
-        userRole = sync.user.role;
+    try {
+      const existing = await prisma.user.findUnique({
+        where: { clerkId: userId },
+        select: { role: true, status: true },
+      });
+
+      if (existing && existing.status === "ACTIVE" && existing.role) {
+        userRole = existing.role;
+      } else {
+        const sync = await syncUserFromClerk(userId);
+        if (sync.user) {
+          userRole = sync.user.role;
+        }
+      }
+    } catch (err) {
+      console.warn("Retrying database sync after wake-up delay:", err);
+      try {
+        const sync = await syncUserFromClerk(userId);
+        if (sync.user) {
+          userRole = sync.user.role;
+        }
+      } catch (retryErr) {
+        console.error("Database connection failed after retry:", retryErr);
       }
     }
 

@@ -72,6 +72,8 @@ export default clerkMiddleware(async (auth, req) => {
   // If role is not yet in token, let request through to the portal layout
   // where getPortalSession() verifies against the database (the source of truth)
   return NextResponse.next();
+}, {
+  clockSkewInMs: 60000,
 });
 
 export const config = {

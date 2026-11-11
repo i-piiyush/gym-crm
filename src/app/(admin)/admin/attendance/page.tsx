@@ -3,7 +3,6 @@ import { FadeIn } from "@/components/motion/FadeIn";
 import { LiveAttendanceView } from "@/features/attendance/components/LiveAttendanceView";
 import { getPortalSession } from "@/lib/session";
 import * as attendanceRepo from "@/db/repositories/attendance.repo";
-import prisma from "@/db/client";
 import { formatInTimeZone } from "date-fns-tz";
 import Link from "next/link";
 import { LuQrCode } from "react-icons/lu";
@@ -15,12 +14,7 @@ export default async function AdminAttendancePage() {
   const session = await getPortalSession("ADMIN");
   const gymId = session.gymId!;
 
-  const gym = await prisma.gym.findUnique({
-    where: { id: gymId },
-    select: { timezone: true },
-  });
-
-  const timezone = gym?.timezone || "Asia/Kolkata";
+  const timezone = session.timezone || "Asia/Kolkata";
   const todayStr = formatInTimeZone(new Date(), timezone, "yyyy-MM-dd");
   const currentMonth = formatInTimeZone(new Date(), timezone, "yyyy-MM");
 

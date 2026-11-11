@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { UserRoleType } from "@/constants/roles";
@@ -13,6 +14,12 @@ interface TopbarProps {
 }
 
 export function Topbar({ role, gymName, userName }: TopbarProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur lg:px-6">
       <div className="flex items-center gap-3">
@@ -45,13 +52,19 @@ export function Topbar({ role, gymName, userName }: TopbarProps) {
           </span>
         )}
 
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: "h-8 w-8",
-            },
-          }}
-        />
+        <div className="h-8 w-8 flex items-center justify-center">
+          {mounted ? (
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "h-8 w-8",
+                },
+              }}
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+          )}
+        </div>
       </div>
     </header>
   );

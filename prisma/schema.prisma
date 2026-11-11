@@ -127,6 +127,7 @@ model User {
   @@index([gymId])
   @@index([role])
   @@index([status])
+  @@index([gymId, status])
   @@index([email])
 }
 
@@ -147,6 +148,7 @@ model Invitation {
   @@index([gymId])
   @@index([email])
   @@index([status])
+  @@index([gymId, role, status])
 }
 
 model TrainerProfile {
@@ -181,6 +183,8 @@ model CustomerProfile {
   @@index([status])
   @@index([membershipEnd])
   @@index([trialEndsAt])
+  @@index([status, membershipEnd])
+  @@index([status, trialEndsAt])
 }
 
 model MembershipPlan {
@@ -236,6 +240,7 @@ model Payment {
   @@index([customerId])
   @@index([paidAt])
   @@index([status])
+  @@index([gymId, status, paidAt])
 }
 
 model ReceiptDelivery {
@@ -276,6 +281,7 @@ model SalaryRecord {
   @@index([gymId])
   @@index([status])
   @@index([month])
+  @@index([gymId, month, status])
 }
 
 model Attendance {

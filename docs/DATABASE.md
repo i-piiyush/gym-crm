@@ -225,17 +225,18 @@ Maintains strictly monotonic, yearly reset receipt counters per gym.
 | `ReceiptCounter` | `(gymId, year)` | Unique Compound | Atomic sequence increment inside payment transaction. |
 | `User` | `(clerkId)` | Unique B-Tree | Post-auth session lookup in middleware and safe-action wrapper. |
 | `User` | `(email)` | Unique B-Tree | Invitations reconciliation and sign-in match. |
-| `User` | `(gymId, role, status)` | Compound B-Tree | Admin people dashboard filtering (active trainers / customers). |
-| `Invitation` | `(gymId, status)` | Compound B-Tree | Listing pending invites and calculating gym capacity. |
+| `User` | `(gymId, status)` | Compound B-Tree | Admin dashboard trainer counts. |
+| `Invitation` | `(gymId, role, status)` | Compound B-Tree | Counting pending customer invites and filtering by gym. |
 | `Invitation` | `(clerkInvitationId)`| Unique B-Tree | Clerk invitation webhook resolution. |
 | `CustomerProfile` | `(trainerId)` | B-Tree | Trainer portal filtering assigned customers. |
 | `CustomerProfile` | `(status, membershipEnd)` | Compound B-Tree | Expiration cron job querying overdue active subscriptions. |
 | `CustomerProfile` | `(status, trialEndsAt)` | Compound B-Tree | Expiration cron job querying expired trials. |
 | `Payment` | `(gymId, receiptNumber)` | Unique Compound | Receipt lookup by human-readable reference number. |
-| `Payment` | `(gymId, paidAt)` | Compound B-Tree | Monthly revenue calculations on admin dashboard. |
+| `Payment` | `(gymId, status, paidAt)` | Compound B-Tree | Monthly paid revenue calculations on admin dashboard. |
 | `Attendance` | `(userId, date)` | Unique Compound | Fast upsert / duplicate check on check-in scan. |
 | `Attendance` | `(gymId, date, checkInAt)`| Compound B-Tree | Live attendance feed polling (`/api/attendance/today`). |
 | `SalaryRecord` | `(trainerId, month)` | Unique Compound | Prevents duplicate salary disbursements per month. |
+| `SalaryRecord` | `(gymId, month, status)` | Compound B-Tree | Pending salary totals on admin dashboard. |
 
 ---
 

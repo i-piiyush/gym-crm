@@ -16,7 +16,8 @@ This document details every environment variable required by the Gym CRM applica
 | `CLERK_WEBHOOK_SIGNING_SECRET` | Server Only | **Required** | Svix webhook secret for verifying incoming `user.created` and `invitation.accepted` hooks. |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | Client & Server | `/sign-in` | Path to Clerk sign-in page. |
 | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | Client & Server | `/sign-up` | Path to Clerk sign-up page. |
-| `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | Client & Server | `/admin` | Fallback post-login redirect path (middleware routes dynamically by role). |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | Client & Server | `/` | Fallback post-login redirect path (middleware routes dynamically by role). |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | Client & Server | `/` | Fallback post-signup redirect path (middleware routes dynamically by role). |
 | `QR_TOKEN_SECRET` | Server Only | **Required** (min 32 chars) | HMAC-SHA256 secret for signing 15-second rotating attendance QR payloads. |
 | `RECEIPT_LINK_SECRET` | Server Only | **Required** (min 32 chars) | HMAC-SHA256 secret for signing 30-day public receipt PDF download URLs. |
 | `CRON_SECRET` | Server Only | **Required** (min 16 chars) | Bearer secret required to trigger `/api/cron/expire-memberships`. |

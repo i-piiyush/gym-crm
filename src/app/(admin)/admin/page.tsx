@@ -2,9 +2,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { getPortalSession } from "@/lib/session";
 import { getAdminDashboardStats } from "@/services/dashboard.service";
-import { getGymDetails } from "@/services/gym.service";
 import { DashboardOverview } from "@/features/dashboard/components/DashboardOverview";
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { LuQrCode } from "react-icons/lu";
 
@@ -13,20 +11,17 @@ export const dynamic = "force-dynamic";
 export default async function AdminOverviewPage() {
   const session = await getPortalSession("ADMIN");
   const gymId = session.gymId!;
+  const gymName = session.gymName || "Gym";
 
-  const [stats, gym] = await Promise.all([
-    getAdminDashboardStats(gymId),
-    getGymDetails(gymId),
-  ]);
-
-  if (!gym) {
-    notFound();
-  }
+  const stats = await getAdminDashboardStats(gymId, {
+    timezone: session.timezone || "Asia/Kolkata",
+    maxCustomers: session.maxCustomers || 100,
+  });
 
   return (
     <FadeIn className="space-y-6">
       <PageHeader
-        title={`${gym.name} Dashboard`}
+        title={`${gymName} Dashboard`}
         description="Monitor member capacity, active attendance, monthly revenue, and operational alerts."
         action={
           <Link
@@ -39,7 +34,7 @@ export default async function AdminOverviewPage() {
         }
       />
 
-      <DashboardOverview stats={stats} gymName={gym.name} />
+      <DashboardOverview stats={stats} gymName={gymName} />
     </FadeIn>
   );
 }
