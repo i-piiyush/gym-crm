@@ -77,7 +77,7 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div>
           <div className="flex items-center gap-1.5 text-xs text-dim mb-1">
-            <span className="font-medium uppercase tracking-wider">
+            <span className="font-medium tracking-wide">
               {profile.user.gym?.name || "Fitness Center"}
             </span>
           </div>
@@ -85,7 +85,8 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
             Welcome back, {profile.user.name.split(" ")[0]}
           </h2>
           <p className="text-xs text-dim mt-0.5">
-            Scan the reception QR station or check in to log today&apos;s workout.
+            Scan the reception QR station or check in to log today&apos;s
+            workout.
           </p>
         </div>
 
@@ -104,7 +105,7 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
         <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-border/50 pb-3.5">
-              <span className="text-xs font-medium text-dim uppercase tracking-wider">
+              <span className="text-xs font-medium text-dim tracking-wide">
                 Membership Pass
               </span>
               <StatusBadge status={profile.status} label={profile.status} />
@@ -112,13 +113,16 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
 
             <div className="mt-4">
               <h3 className="text-lg font-semibold text-foreground tracking-tight">
-                {profile.plan?.name || (profile.status === "TRIAL" ? "Free Trial Pass" : "Active Membership")}
+                {profile.plan?.name ||
+                  (profile.status === "TRIAL"
+                    ? "Free Trial Pass"
+                    : "Active Membership")}
               </h3>
               <p className="text-xs text-dim mt-1">{validityText}</p>
             </div>
           </div>
 
-          <div className="mt-6 flex items-center justify-between rounded-xl bg-[#F5F5F3]/60 p-3.5 border border-border/60">
+          <div className="mt-6 flex items-center justify-between rounded-xl bg-muted/60 p-3.5 border border-border/60">
             <div className="flex items-center gap-2 text-xs text-dim">
               <Clock className="h-3.5 w-3.5" />
               <span>Pass Validity:</span>
@@ -126,7 +130,7 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
             <span
               className={`font-semibold text-xs tabular-nums ${
                 daysLeft !== null && daysLeft <= 3
-                  ? "text-rose-600"
+                  ? "text-status-danger-fg"
                   : "text-foreground"
               }`}
             >
@@ -143,10 +147,10 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
         <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-border/50 pb-3.5">
-              <span className="text-xs font-medium text-dim uppercase tracking-wider">
+              <span className="text-xs font-medium text-dim tracking-wide">
                 Assigned Coach
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-honeydew/50 border border-[#B5D5BD] px-2.5 py-0.5 text-[11px] font-medium text-[#204E2B]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-honeydew/50 border border-status-active-fg/20 px-2.5 py-0.5 text-[11px] font-medium text-status-active-fg">
                 <User className="h-3 w-3" />
                 <span>Coach</span>
               </span>
@@ -178,33 +182,39 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dim uppercase tracking-wider">
+            <span className="text-xs font-medium text-dim tracking-wide">
               Workouts This Month
             </span>
             <CalendarCheck className="h-4 w-4 text-dim" />
           </div>
           <p className="mt-2 text-2xl font-semibold font-mono text-foreground tabular-nums tracking-tight">
-            {thisMonthCount} <span className="text-xs font-normal text-dim">sessions</span>
+            {thisMonthCount}{" "}
+            <span className="text-xs font-normal text-dim">sessions</span>
           </p>
-          <span className="text-xs text-dim mt-1 block">Verified by GPS geofence</span>
+          <span className="text-xs text-dim mt-1 block">
+            Verified by GPS geofence
+          </span>
         </div>
 
         <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dim uppercase tracking-wider">
+            <span className="text-xs font-medium text-dim tracking-wide">
               Current Streak
             </span>
             <Flame className="h-4 w-4 text-desert" />
           </div>
           <p className="mt-2 text-2xl font-semibold font-mono text-foreground tabular-nums tracking-tight">
-            {streak} <span className="text-xs font-normal text-dim">days streak</span>
+            {streak}{" "}
+            <span className="text-xs font-normal text-dim">days streak</span>
           </p>
-          <span className="text-xs text-dim mt-1 block">Consecutive gym visits</span>
+          <span className="text-xs text-dim mt-1 block">
+            Consecutive gym visits
+          </span>
         </div>
 
         <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dim uppercase tracking-wider">
+            <span className="text-xs font-medium text-dim tracking-wide">
               Facility Location
             </span>
             <MapPin className="h-4 w-4 text-dim" />
@@ -221,7 +231,9 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
       {/* Recent Attendance Log */}
       <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex items-center justify-between border-b border-border/50 pb-4">
-          <h3 className="text-sm font-semibold text-foreground">Recent Check-In History</h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            Recent Check-In History
+          </h3>
           <Link
             href="/customer/attendance"
             className="inline-flex items-center gap-1 text-xs font-medium text-dim hover:text-foreground transition-colors"
@@ -234,7 +246,8 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
         <div className="mt-4 divide-y divide-border/50">
           {attendances.length === 0 ? (
             <p className="py-8 text-center text-xs text-dim">
-              No check-ins logged yet. Scan the reception QR code to log your first session!
+              No check-ins logged yet. Scan the reception QR code to log your
+              first session!
             </p>
           ) : (
             attendances.slice(0, 5).map((a) => (
@@ -243,7 +256,7 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
                 className="flex items-center justify-between py-3.5 text-xs"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-honeydew text-[#204E2B]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-honeydew text-status-active-fg">
                     <Calendar className="h-4 w-4" />
                   </div>
                   <div>
@@ -256,7 +269,7 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
                   </div>
                 </div>
 
-                <span className="rounded-full border border-border/70 bg-[#F5F5F3] px-2.5 py-0.5 text-[11px] font-mono text-dim tabular-nums">
+                <span className="rounded-full border border-border/70 bg-muted px-2.5 py-0.5 text-[11px] font-mono text-dim tabular-nums">
                   {Number(a.distanceMeters).toFixed(0)}m from center
                 </span>
               </div>

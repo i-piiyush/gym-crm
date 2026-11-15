@@ -1,6 +1,15 @@
 "use client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addPersonSchema, AddPersonInput } from "@/schemas/person.schema";
@@ -9,7 +18,11 @@ import { PhoneInput } from "@/components/shared/PhoneInput";
 import { PressableButton } from "@/components/motion/PressableButton";
 import { TrainerOption, PlanOption } from "@/types/person.types";
 import { toast } from "sonner";
-import { LuX, LuUserPlus, LuShieldAlert } from "react-icons/lu";
+import {
+  X as LuX,
+  UserPlus as LuUserPlus,
+  ShieldAlert as LuShieldAlert,
+} from "lucide-react";
 
 interface AddPersonDialogProps {
   isOpen: boolean;
@@ -40,9 +53,14 @@ export function AddPersonDialog({
   capacity,
 }: AddPersonDialogProps) {
   const trainerOptions = rawOptions || rawTrainers || [];
-  const capacityText = rawCapText || (capacity ? `${capacity.totalCount}/${capacity.maxCustomers}` : "");
-  const [selectedRole, setSelectedRole] = useState<"CUSTOMER" | "TRAINER">("CUSTOMER");
+  const capacityText =
+    rawCapText ||
+    (capacity ? `${capacity.totalCount}/${capacity.maxCustomers}` : "");
+  const [selectedRole, setSelectedRole] = useState<"CUSTOMER" | "TRAINER">(
+    "CUSTOMER",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const form = useForm<AddPersonInput>({
     resolver: zodResolver(addPersonSchema),
@@ -80,17 +98,21 @@ export function AddPersonDialog({
 
   const onSubmit = async (data: AddPersonInput) => {
     if (data.role === "CUSTOMER" && isAtCapacity) {
-      toast.error(`Gym capacity limit reached (${capacityText}). Cannot add customer.`);
+      toast.error(
+        `Gym capacity limit reached (${capacityText}). Cannot add customer.`,
+      );
       return;
     }
 
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       const res = await addPersonAction(data);
       if (res.success) {
         toast.success(
-          `Invitation sent to ${data.name} (${data.email}) as a ${data.role.toLowerCase()}!`
+          `Invitation sent to ${data.name} (${data.email}) as a ${data.role.toLowerCase()}!`,
         );
+        router.refresh();
         reset();
         onClose();
       } else {
@@ -106,110 +128,129 @@ export function AddPersonDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
-      />
-
-      {/* Modal Dialog */}
-      <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-primary dark:bg-emerald-950/40">
-              <LuUserPlus className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-foreground">Add Person to Gym</h2>
-              <p className="text-xs text-muted-foreground">
-                Invite a trainer or customer via email.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
-          >
-            <LuX className="h-5 w-5" />
-          </button>
-        </div>
-
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => !open && !isSubmitting && onClose()}
+    >
+      <DialogContent
+        onEscapeKeyDown={(e) => isSubmitting && e.preventDefault()}
+        onPointerDownOutside={(e) => isSubmitting && e.preventDefault()}
+      >
+        <DialogTitle className="pr-7">Add a member or coach</DialogTitle>
+        <DialogDescription>
+          Send an invitation to join your gym.
+        </DialogDescription>
         {/* Role Toggle */}
-        <div className="mt-5 flex rounded-xl bg-slate-100 p-1 dark:bg-slate-900 border border-border">
-          <button
+        <div className="mt-5 flex rounded-xl bg-muted p-1  border border-border">
+          <Button
             type="button"
             onClick={() => handleRoleChange("CUSTOMER")}
-            className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-all ${
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
               selectedRole === "CUSTOMER"
                 ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Customer
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => handleRoleChange("TRAINER")}
-            className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-all ${
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
               selectedRole === "TRAINER"
                 ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Trainer
-          </button>
+          </Button>
         </div>
 
         {/* Capacity Alert if at limit for customers */}
         {selectedRole === "CUSTOMER" && isAtCapacity && (
-          <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900">
-            <LuShieldAlert className="h-5 w-5 shrink-0 text-rose-600" />
+          <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-rose-200 bg-status-danger-bg p-3 text-xs text-status-danger-fg   ">
+            <LuShieldAlert className="h-5 w-5 shrink-0 text-status-danger-fg" />
             <div>
-              <span className="font-bold">Gym Capacity Reached ({capacityText})</span>
+              <span className="font-semibold">
+                Gym Capacity Reached ({capacityText})
+              </span>
               <p className="mt-0.5 text-[11px] leading-relaxed">
-                This gym has reached its customer limit. The Add Customer button is disabled.
+                This gym has reached its customer limit. The Add Customer button
+                is disabled.
               </p>
             </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4">
+        <form
+          noValidate
+          onSubmit={handleSubmit(onSubmit)}
+          className="mt-5 space-y-4"
+        >
           <input type="hidden" {...register("role")} />
 
           {/* Name & Email */}
           <div>
-            <label className="block text-xs font-semibold text-foreground mb-1">
+            <label
+              htmlFor="register-name"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Full Name <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? "register-name-error" : undefined}
+              id="register-name"
               {...register("name")}
               type="text"
               placeholder="e.g. Rahul Sharma"
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             {errors.name && (
-              <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>
+              <p
+                id="register-name-error"
+                role="alert"
+                className="mt-1 text-xs text-destructive"
+              >
+                {errors.name.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-foreground mb-1">
+            <label
+              htmlFor="register-email"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Email Address <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
+              aria-invalid={!!errors.email}
+              aria-describedby={
+                errors.email ? "register-email-error" : undefined
+              }
+              id="register-email"
               {...register("email")}
               type="email"
               placeholder="e.g. rahul.sharma@example.com"
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             {errors.email && (
-              <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>
+              <p
+                id="register-email-error"
+                role="alert"
+                className="mt-1 text-xs text-destructive"
+              >
+                {errors.email.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-foreground mb-1">
+            <label
+              htmlFor="register-phone"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Contact Phone (Optional)
             </label>
             <Controller
@@ -217,6 +258,7 @@ export function AddPersonDialog({
               control={control}
               render={({ field }) => (
                 <PhoneInput
+                  id="register-phone"
                   value={field.value || ""}
                   onChange={field.onChange}
                   error={errors.phone?.message}
@@ -227,12 +269,22 @@ export function AddPersonDialog({
 
           {/* TRAINER SPECIFIC FIELDS */}
           {selectedRole === "TRAINER" && (
-            <div className="grid gap-3.5 sm:grid-cols-2 rounded-xl border border-border bg-slate-50/60 p-3.5 dark:bg-slate-900/40">
+            <div className="grid gap-3.5 sm:grid-cols-2 rounded-xl border border-border bg-muted/60 p-3.5 ">
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1">
+                <label
+                  htmlFor="register-monthlySalary"
+                  className="block text-sm font-medium text-foreground mb-1"
+                >
                   Monthly Salary (₹) <span className="text-destructive">*</span>
                 </label>
-                <input
+                <Input
+                  aria-invalid={!!errors.monthlySalary}
+                  aria-describedby={
+                    errors.monthlySalary
+                      ? "register-monthlySalary-error"
+                      : undefined
+                  }
+                  id="register-monthlySalary"
                   {...register("monthlySalary", { valueAsNumber: true })}
                   type="number"
                   placeholder="35000"
@@ -240,17 +292,31 @@ export function AddPersonDialog({
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 {errors.monthlySalary && (
-                  <p className="mt-1 text-xs text-destructive">
+                  <p
+                    id="register-monthlySalary-error"
+                    role="alert"
+                    className="mt-1 text-xs text-destructive"
+                  >
                     {errors.monthlySalary.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1">
+                <label
+                  htmlFor="register-salaryDueDay"
+                  className="block text-sm font-medium text-foreground mb-1"
+                >
                   Salary Due Day of Month
                 </label>
-                <input
+                <Input
+                  aria-invalid={!!errors.salaryDueDay}
+                  aria-describedby={
+                    errors.salaryDueDay
+                      ? "register-salaryDueDay-error"
+                      : undefined
+                  }
+                  id="register-salaryDueDay"
                   {...register("salaryDueDay", { valueAsNumber: true })}
                   type="number"
                   defaultValue={1}
@@ -258,9 +324,15 @@ export function AddPersonDialog({
                   max={28}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
-                <p className="mt-0.5 text-[10px] text-muted-foreground">Day 1 to 28</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
+                  Day 1 to 28
+                </p>
                 {errors.salaryDueDay && (
-                  <p className="mt-1 text-xs text-destructive">
+                  <p
+                    id="register-salaryDueDay-error"
+                    role="alert"
+                    className="mt-1 text-xs text-destructive"
+                  >
                     {errors.salaryDueDay.message}
                   </p>
                 )}
@@ -270,18 +342,27 @@ export function AddPersonDialog({
 
           {/* CUSTOMER SPECIFIC FIELDS */}
           {selectedRole === "CUSTOMER" && (
-            <div className="space-y-3.5 rounded-xl border border-border bg-slate-50/60 p-3.5 dark:bg-slate-900/40">
+            <div className="space-y-3.5 rounded-xl border border-border bg-muted/60 p-3.5 ">
               {/* Mandatory Trainer Selection */}
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1">
+                <label
+                  htmlFor="register-trainerId"
+                  className="block text-sm font-medium text-foreground mb-1"
+                >
                   Assigned Trainer <span className="text-destructive">*</span>
                 </label>
                 {trainerOptions.length === 0 ? (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800">
-                    No active trainers in this gym. Add a trainer before enrolling customers.
+                  <div className="rounded-lg border border-amber-200 bg-status-warning-bg p-2.5 text-xs text-status-warning-fg">
+                    No active trainers in this gym. Add a trainer before
+                    enrolling customers.
                   </div>
                 ) : (
                   <select
+                    aria-invalid={!!errors.trainerId}
+                    aria-describedby={
+                      errors.trainerId ? "register-trainerId-error" : undefined
+                    }
+                    id="register-trainerId"
                     {...register("trainerId")}
                     className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
@@ -294,7 +375,11 @@ export function AddPersonDialog({
                   </select>
                 )}
                 {errors.trainerId && (
-                  <p className="mt-1 text-xs text-destructive">
+                  <p
+                    id="register-trainerId-error"
+                    role="alert"
+                    className="mt-1 text-xs text-destructive"
+                  >
                     {errors.trainerId.message}
                   </p>
                 )}
@@ -305,23 +390,32 @@ export function AddPersonDialog({
                 <input
                   {...register("isTrial")}
                   type="checkbox"
+                  aria-invalid={!!errors.isTrial}
+                  aria-describedby={
+                    errors.isTrial ? "isTrialToggle-error" : undefined
+                  }
                   id="isTrialToggle"
                   className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
                 />
-                <label
-                  htmlFor="isTrialToggle"
-                  className="text-xs font-semibold text-foreground cursor-pointer"
-                >
+                <label className="text-sm font-medium text-foreground cursor-pointer">
                   Start customer with a free trial period
                 </label>
               </div>
 
               {isTrial ? (
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1">
+                  <label
+                    htmlFor="register-trialDays"
+                    className="block text-sm font-medium text-foreground mb-1"
+                  >
                     Trial Duration (Days)
                   </label>
-                  <input
+                  <Input
+                    aria-invalid={!!errors.trialDays}
+                    aria-describedby={
+                      errors.trialDays ? "register-trialDays-error" : undefined
+                    }
+                    id="register-trialDays"
                     {...register("trialDays", { valueAsNumber: true })}
                     type="number"
                     min={1}
@@ -330,22 +424,32 @@ export function AddPersonDialog({
                     className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                   <p className="mt-0.5 text-[10px] text-muted-foreground">
-                    Trial expiration will be automatically computed and flipped to EXPIRED by cron.
+                    Trial expiration will be automatically computed and flipped
+                    to EXPIRED by cron.
                   </p>
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1">
+                  <label
+                    htmlFor="register-planId"
+                    className="block text-sm font-medium text-foreground mb-1"
+                  >
                     Initial Membership Plan (Optional)
                   </label>
                   <select
+                    aria-invalid={!!errors.planId}
+                    aria-describedby={
+                      errors.planId ? "register-planId-error" : undefined
+                    }
+                    id="register-planId"
                     {...register("planId")}
                     className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select a membership plan</option>
                     {plans.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} ({p.durationDays} days) - ₹{p.price.toLocaleString("en-IN")}
+                        {p.name} ({p.durationDays} days) - ₹
+                        {p.price.toLocaleString("en-IN")}
                       </option>
                     ))}
                   </select>
@@ -357,14 +461,15 @@ export function AddPersonDialog({
                 <input
                   {...register("emailReceipt")}
                   type="checkbox"
+                  aria-invalid={!!errors.emailReceipt}
+                  aria-describedby={
+                    errors.emailReceipt ? "emailReceiptToggle-error" : undefined
+                  }
                   id="emailReceiptToggle"
                   defaultChecked={true}
                   className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
                 />
-                <label
-                  htmlFor="emailReceiptToggle"
-                  className="text-xs text-muted-foreground cursor-pointer"
-                >
+                <label className="text-xs text-muted-foreground cursor-pointer">
                   Email receipt to customer upon enrollment (if plan is chosen)
                 </label>
               </div>
@@ -392,15 +497,14 @@ export function AddPersonDialog({
               }
             >
               {isSubmitting
-                ? "Sending Invitation..."
+                ? "Sending invitation…"
                 : selectedRole === "CUSTOMER" && isAtCapacity
-                ? "Capacity Limit Reached"
-                : `Send ${selectedRole.toLowerCase()} invitation`}
+                  ? "Capacity Limit Reached"
+                  : `Send ${selectedRole.toLowerCase()} invitation`}
             </PressableButton>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
-

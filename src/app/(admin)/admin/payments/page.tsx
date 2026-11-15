@@ -16,8 +16,8 @@ export default async function AdminPaymentsPage() {
   return (
     <FadeIn className="space-y-6">
       <PageHeader
-        title="Payments & Receipts"
-        description="Record customer membership fees, generate sequential receipts, and track automated email delivery."
+        title="Payments"
+        description="Every payment, receipt, and renewal in one clear view."
       />
 
       <PaymentsView
@@ -28,4 +28,3 @@ export default async function AdminPaymentsPage() {
     </FadeIn>
   );
 }
-

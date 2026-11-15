@@ -59,14 +59,15 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
       {/* Welcome Banner */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div>
-          <span className="text-xs font-medium text-dim uppercase tracking-wider">
+          <span className="text-xs font-medium text-dim tracking-wide">
             Coaching Staff Portal
           </span>
           <h2 className="text-xl font-semibold tracking-tight text-foreground mt-1">
             Hello, Coach {trainerProfile?.user.name.split(" ")[0]}
           </h2>
           <p className="text-xs text-dim mt-0.5">
-            Track client attendance, record personal check-in, and view compensation statements.
+            Track client attendance, record personal check-in, and view
+            compensation statements.
           </p>
         </div>
 
@@ -87,7 +88,7 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
           className="group rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all active:scale-[0.98]"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dim uppercase tracking-wider">
+            <span className="text-xs font-medium text-dim tracking-wide">
               Assigned Clients
             </span>
             <Users className="h-4 w-4 text-dim" />
@@ -104,16 +105,20 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
           className="group rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all active:scale-[0.98]"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dim uppercase tracking-wider">
+            <span className="text-xs font-medium text-dim tracking-wide">
               Clients Present
             </span>
             <CalendarCheck className="h-4 w-4 text-dim" />
           </div>
           <p className="mt-2 text-2xl font-semibold font-mono text-foreground tabular-nums tracking-tight">
             {clientsCheckedInToday}{" "}
-            <span className="text-xs font-normal text-dim">/ {totalAssignedClients}</span>
+            <span className="text-xs font-normal text-dim">
+              / {totalAssignedClients}
+            </span>
           </p>
-          <span className="text-xs text-dim mt-1 block">Attended facility today</span>
+          <span className="text-xs text-dim mt-1 block">
+            Attended facility today
+          </span>
         </Link>
 
         {/* Personal Attendance Status */}
@@ -122,11 +127,11 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
           className="group rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all active:scale-[0.98]"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dim uppercase tracking-wider">
+            <span className="text-xs font-medium text-dim tracking-wide">
               My Status ({todayDateStr})
             </span>
             {checkedInToday ? (
-              <CheckCircle2 className="h-4 w-4 text-[#204E2B]" />
+              <CheckCircle2 className="h-4 w-4 text-status-active-fg" />
             ) : (
               <Clock className="h-4 w-4 text-desert" />
             )}
@@ -145,17 +150,27 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
           className="group rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all active:scale-[0.98]"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dim uppercase tracking-wider">
+            <span className="text-xs font-medium text-dim tracking-wide">
               Monthly Salary
             </span>
             <Banknote className="h-4 w-4 text-dim" />
           </div>
           <p className="mt-2 text-xl font-semibold font-mono text-foreground tabular-nums tracking-tight">
-            ₹{currentSalary ? currentSalary.amount.toLocaleString("en-IN") : Number(trainerProfile?.monthlySalary || 0).toLocaleString("en-IN")}
+            ₹
+            {currentSalary
+              ? currentSalary.amount.toLocaleString("en-IN")
+              : Number(trainerProfile?.monthlySalary || 0).toLocaleString(
+                  "en-IN",
+                )}
           </p>
           <div className="mt-2 flex items-center justify-between text-xs">
-            <span className="text-dim">Day {trainerProfile?.salaryDueDay || 1}</span>
-            <StatusBadge status={currentSalary?.status || "PENDING"} label={currentSalary?.status || "PENDING"} />
+            <span className="text-dim">
+              Day {trainerProfile?.salaryDueDay || 1}
+            </span>
+            <StatusBadge
+              status={currentSalary?.status || "PENDING"}
+              label={currentSalary?.status || "PENDING"}
+            />
           </div>
         </Link>
       </div>
@@ -163,7 +178,9 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
       {/* Recent Personal Attendance Log */}
       <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div className="flex items-center justify-between border-b border-border/50 pb-4">
-          <h3 className="text-sm font-semibold text-foreground">Recent Check-In History</h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            Recent Check-In History
+          </h3>
           <Link
             href="/trainer/attendance"
             className="inline-flex items-center gap-1 text-xs font-medium text-dim hover:text-foreground transition-colors"
@@ -185,7 +202,7 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
                 className="flex items-center justify-between py-3.5 text-xs"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-honeydew text-[#204E2B]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-honeydew text-status-active-fg">
                     <CalendarCheck className="h-4 w-4" />
                   </div>
                   <div>
@@ -193,12 +210,13 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
                       {format(new Date(a.checkInAt), "EEEE, dd MMMM yyyy")}
                     </div>
                     <div className="text-[11px] text-dim">
-                      Checked in at {format(new Date(a.checkInAt), "hh:mm:ss a")}
+                      Checked in at{" "}
+                      {format(new Date(a.checkInAt), "hh:mm:ss a")}
                     </div>
                   </div>
                 </div>
 
-                <span className="rounded-full border border-border/70 bg-[#F5F5F3] px-2.5 py-0.5 text-[11px] font-mono text-dim tabular-nums">
+                <span className="rounded-full border border-border/70 bg-muted px-2.5 py-0.5 text-[11px] font-mono text-dim tabular-nums">
                   {Number(a.distanceMeters).toFixed(0)}m from center
                 </span>
               </div>

@@ -16,8 +16,8 @@ export default async function AdminPeoplePage() {
   return (
     <FadeIn className="space-y-6">
       <PageHeader
-        title="People & Staff Management"
-        description="Manage enrolled trainers, customer memberships, mandatory trainer assignments, and invitations."
+        title="Members"
+        description="A little more personal. A lot more organized."
       />
 
       <PeopleView
@@ -31,4 +31,3 @@ export default async function AdminPeoplePage() {
     </FadeIn>
   );
 }
-

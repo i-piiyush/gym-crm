@@ -1,149 +1,183 @@
 "use client";
-
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
+import {
+  PanelLeftClose,
+  PanelLeftOpen,
+  Building2,
+  HelpCircle,
+  ArrowUpRight,
+} from "lucide-react";
 import { UserRoleType } from "@/constants/roles";
-import { ADMIN_NAV_SECTIONS, ROLE_NAVIGATION, NavSection } from "@/config/navigation";
+import {
+  ADMIN_NAV_SECTIONS,
+  ROLE_NAVIGATION,
+  NavSection,
+} from "@/config/navigation";
+import { Brand } from "@/components/shared/Brand";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Building2, ChevronRight, Sparkles } from "lucide-react";
-
-interface SidebarProps {
+export function NavigationItems({
+  role,
+  collapsed = false,
+  onNavigate,
+}: {
   role: UserRoleType;
-  gymName?: string;
-  userName?: string;
-}
-
-export function Sidebar({ role, gymName, userName }: SidebarProps) {
+  collapsed?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
-
-  // If Admin, use structured sections; otherwise flat list grouped by section
   const sections: NavSection[] =
     role === "ADMIN"
       ? ADMIN_NAV_SECTIONS
-      : [
-          {
-            title: "MENU",
-            items: ROLE_NAVIGATION[role] || [],
-          },
-        ];
-
+      : [{ title: "WORKSPACE", items: ROLE_NAVIGATION[role] }];
+  const links = sections.flatMap((s) => s.items);
   return (
-    <aside className="hidden lg:flex w-64 flex-col border-r border-[rgba(40,40,40,0.08)] bg-[#FAFAF8] select-none">
-      {/* -------------------------------------------------------------------- */}
-      {/* 1. TOP BRAND & FACILITY IDENTIFIER */}
-      {/* -------------------------------------------------------------------- */}
-      <div className="flex flex-col border-b border-[rgba(40,40,40,0.07)] px-5 py-4">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 text-[#242424] transition-opacity hover:opacity-85"
-        >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#242424] text-white shadow-sm">
-            <span className="font-mono text-xs font-bold tracking-tighter">OS</span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-sm font-semibold tracking-tight text-[#242424]">GYM-OS</span>
-            <span className="text-[10px] font-medium text-[#71697a]">2.0</span>
-          </div>
-        </Link>
-
-        {/* Facility Card */}
-        <div className="mt-3.5 flex items-center justify-between rounded-xl border border-[rgba(40,40,40,0.06)] bg-white px-3 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#f2f6d0] text-[#242424]">
-              <Building2 className="h-3.5 w-3.5" />
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="truncate text-xs font-medium text-[#242424]">
-                {gymName || "Active Facility"}
-              </span>
-              <span className="text-[10px] text-[#71697a]">
-                {role === "ADMIN" ? "Gym Operations" : role.replace("_", " ")}
-              </span>
-            </div>
-          </div>
-          <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
-        </div>
-      </div>
-
-      {/* -------------------------------------------------------------------- */}
-      {/* 2. STRUCTURED NAVIGATION LIST */}
-      {/* -------------------------------------------------------------------- */}
-      <nav className="flex-1 space-y-4 overflow-y-auto px-3.5 py-4">
-        {sections.map((section, sIdx) => (
-          <div key={sIdx} className="space-y-0.5">
-            <p className="px-3 pb-1.5 text-[10px] font-semibold tracking-wider text-[#71697a] uppercase">
+    <nav aria-label="Workspace navigation" className="space-y-6">
+      {sections.map((section) => (
+        <div key={section.title}>
+          {!collapsed && (
+            <p className="mb-2 px-3 text-[10px] font-medium tracking-[1.1px] text-dim/75">
               {section.title}
             </p>
-
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/admin" &&
-                    item.href !== "/trainer" &&
-                    item.href !== "/customer" &&
-                    item.href !== "/super-admin" &&
-                    pathname.startsWith(item.href));
-                const Icon = item.icon;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150",
-                      isActive
-                        ? "bg-white text-[#242424] font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)] border border-[rgba(40,40,40,0.06)]"
-                        : "text-[#71697a] hover:bg-stone-100/70 hover:text-[#242424]"
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "h-4 w-4 shrink-0 transition-colors",
-                        isActive
-                          ? "text-[#242424]"
-                          : "text-[#71697a] group-hover:text-[#242424]"
-                      )}
-                    />
-                    <span className="truncate">{item.title}</span>
-
-                    {item.badge && (
-                      <span className="ml-auto rounded-full bg-[#d0e1d4]/60 px-2 py-0.5 text-[10px] font-semibold text-emerald-900">
-                        {item.badge}
-                      </span>
-                    )}
-
-                    {isActive && (
-                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#242424]" />
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
+          )}
+          <div className="space-y-1">
+            {section.items.map((item) => {
+              const active =
+                pathname === item.href ||
+                (pathname.startsWith(item.href + "/") &&
+                  !links.some(
+                    (other) =>
+                      other.href !== item.href &&
+                      other.href.length > item.href.length &&
+                      pathname.startsWith(other.href),
+                  ) &&
+                  item.href.split("/").length > 2);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  aria-current={active ? "page" : undefined}
+                  title={collapsed ? item.title : undefined}
+                  className={cn(
+                    "flex h-10 items-center gap-3 rounded-lg px-3 text-[13px] transition-colors",
+                    active
+                      ? "bg-cream/75 font-medium text-foreground"
+                      : "text-dim hover:bg-muted hover:text-foreground",
+                    collapsed && "justify-center px-0",
+                  )}
+                >
+                  <item.icon
+                    className="size-[17px] shrink-0"
+                    strokeWidth={1.7}
+                  />
+                  {!collapsed && <span className="truncate">{item.title}</span>}
+                </Link>
+              );
+            })}
           </div>
-        ))}
-      </nav>
-
-      {/* -------------------------------------------------------------------- */}
-      {/* 3. BOTTOM FOOTER BAR */}
-      {/* -------------------------------------------------------------------- */}
-      <div className="border-t border-[rgba(40,40,40,0.07)] p-3">
-        <div className="flex items-center justify-between rounded-xl bg-white p-2.5 border border-[rgba(40,40,40,0.06)] shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e4be9e]/50 text-xs font-semibold text-[#242424]">
-              {userName ? userName.charAt(0).toUpperCase() : "A"}
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="truncate text-xs font-medium text-[#242424]">
-                {userName || "Administrator"}
-              </span>
-              <span className="text-[10px] text-[#71697a] capitalize">
-                {role.toLowerCase().replace("_", " ")}
-              </span>
-            </div>
-          </div>
-          <span className="text-[10px] font-mono text-[#71697a]">v2.0</span>
         </div>
+      ))}
+    </nav>
+  );
+}
+export function Sidebar({
+  role,
+  gymName,
+  userName,
+}: {
+  role: UserRoleType;
+  gymName?: string;
+  userName?: string;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+  return (
+    <aside
+      className={cn(
+        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-muted transition-[width] duration-200 lg:flex",
+        collapsed ? "w-[76px]" : "w-[232px]",
+      )}
+    >
+      <div
+        className={cn(
+          "flex h-[76px] items-center px-6",
+          collapsed && "px-[22px]",
+        )}
+      >
+        <Brand compact={collapsed} />
+      </div>
+      <div className="flex-1 overflow-y-auto px-3 pb-5">
+        {!collapsed && (
+          <div className="mb-7 flex items-center gap-2.5 rounded-lg border border-border bg-card p-3">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-honeydew/45">
+              <Building2 className="size-4 text-status-active-fg" />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium">
+                {gymName || "GYM-OS workspace"}
+              </p>
+              <p className="mt-0.5 text-[10px] capitalize text-dim">
+                {role.toLowerCase().replace("_", " ")} workspace
+              </p>
+            </div>
+          </div>
+        )}
+        <NavigationItems role={role} collapsed={collapsed} />
+        <Link
+          href="/help"
+          title="Help & support"
+          className={cn(
+            "mt-6 flex h-10 items-center gap-3 rounded-lg px-3 text-[13px] text-dim hover:bg-muted",
+            collapsed && "justify-center px-0",
+          )}
+        >
+          <HelpCircle className="size-[17px]" />
+          {!collapsed && (
+            <>
+              Help & support
+              <ArrowUpRight className="ml-auto size-3" />
+            </>
+          )}
+        </Link>
+      </div>
+      <div className="border-t border-border p-3">
+        <div
+          className={cn(
+            "flex items-center gap-2.5 px-2 py-2",
+            collapsed && "justify-center px-0",
+          )}
+        >
+          <UserButton appearance={{ elements: { avatarBox: "size-8" } }} />
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium">
+                {userName || "Your account"}
+              </p>
+              <p className="mt-0.5 text-[10px] text-dim">
+                Account & preferences
+              </p>
+            </div>
+          )}
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-1 w-full"
+          onClick={() => setCollapsed((v) => !v)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? (
+            <PanelLeftOpen />
+          ) : (
+            <>
+              <PanelLeftClose />
+              <span className="ml-1 text-[11px]">Collapse sidebar</span>
+            </>
+          )}
+        </Button>
       </div>
     </aside>
   );

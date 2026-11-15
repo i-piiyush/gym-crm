@@ -1,6 +1,15 @@
 "use client";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CustomerListItem, PlanOption } from "@/types/person.types";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { RecordPaymentDialog } from "@/features/payments/components/RecordPaymentDialog";
@@ -19,10 +28,17 @@ interface TrialsTableProps {
   plans: PlanOption[];
 }
 
-export function TrialsTable({ trials: initialTrials, plans }: TrialsTableProps) {
-  const [trials] = useState<CustomerListItem[]>(initialTrials);
+export function TrialsTable({
+  trials: initialTrials,
+  plans,
+}: TrialsTableProps) {
+  const [trials, setTrials] = useState<CustomerListItem[]>(initialTrials);
   const [search, setSearch] = useState("");
-  const [convertingCustomer, setConvertingCustomer] = useState<CustomerListItem | null>(null);
+  useEffect(() => {
+    setTrials(initialTrials);
+  }, [initialTrials]);
+  const [convertingCustomer, setConvertingCustomer] =
+    useState<CustomerListItem | null>(null);
 
   const now = new Date().getTime();
 
@@ -42,20 +58,21 @@ export function TrialsTable({ trials: initialTrials, plans }: TrialsTableProps) 
       {/* -------------------------------------------------------------------- */}
       <div className="apple-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e4be9e] text-[#242424] shadow-sm">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-desert text-foreground shadow-sm">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-[#242424]">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-semibold text-foreground">
                 Free Trial Members & Leads
               </h2>
-              <span className="rounded-full bg-[#e4be9e]/50 px-2.5 py-0.5 text-xs font-semibold text-[#8c5222]">
+              <span className="rounded-full bg-desert/50 px-2.5 py-0.5 text-xs font-semibold text-status-warning-fg">
                 {trials.length} active trials
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-[#71697a]">
-              Prospects testing the facility. Convert visitors into paid subscribers with sequential receipts.
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Prospects testing the facility. Convert visitors into paid
+              subscribers with sequential receipts.
             </p>
           </div>
         </div>
@@ -66,16 +83,16 @@ export function TrialsTable({ trials: initialTrials, plans }: TrialsTableProps) 
       {/* -------------------------------------------------------------------- */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#858585]" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search trials by customer or coach..."
-            className="w-full rounded-full border border-[rgba(40,40,40,0.08)] bg-white pl-9 pr-4 py-1.5 text-xs text-[#242424] placeholder:text-[#858585] focus:border-[#242424] focus:outline-none focus:ring-1 focus:ring-[#242424] shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors"
+            className="w-full rounded-full border border-border bg-card pl-9 pr-4 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors"
           />
         </div>
-        <span className="text-xs text-[#71697a]">
+        <span className="text-xs text-muted-foreground">
           Showing {filtered.length} of {trials.length} trials
         </span>
       </div>
@@ -85,24 +102,29 @@ export function TrialsTable({ trials: initialTrials, plans }: TrialsTableProps) 
       {/* -------------------------------------------------------------------- */}
       <div className="apple-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-[rgba(40,40,40,0.06)] bg-[#FAFAF8] text-[11px] font-medium text-[#71697a]">
-              <tr>
-                <th className="px-5 py-3.5">Trial Member</th>
-                <th className="px-5 py-3.5">Assigned Coach</th>
-                <th className="px-5 py-3.5">Trial Expiration</th>
-                <th className="px-5 py-3.5">Days Left</th>
-                <th className="px-5 py-3.5">Status</th>
-                <th className="px-5 py-3.5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[rgba(40,40,40,0.05)]">
+          <Table className="w-full text-left text-xs">
+            <TableHeader className="border-b border-border bg-background text-[11px] font-medium text-muted-foreground">
+              <TableRow>
+                <TableHead className="px-5 py-3.5">Trial Member</TableHead>
+                <TableHead className="px-5 py-3.5">Assigned Coach</TableHead>
+                <TableHead className="px-5 py-3.5">Trial Expiration</TableHead>
+                <TableHead className="px-5 py-3.5">Days Left</TableHead>
+                <TableHead className="px-5 py-3.5">Status</TableHead>
+                <TableHead className="px-5 py-3.5 text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-[rgba(40,40,40,0.05)]">
               {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[#71697a]">
-                    {search ? "No trial members match your search." : "No active trial members currently."}
-                  </td>
-                </tr>
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="px-6 py-12 text-center text-muted-foreground"
+                  >
+                    {search
+                      ? "No trial members match your search."
+                      : "No active trial members currently."}
+                  </TableCell>
+                </TableRow>
               ) : (
                 filtered.map((t) => {
                   let daysRemaining = 0;
@@ -121,63 +143,72 @@ export function TrialsTable({ trials: initialTrials, plans }: TrialsTableProps) 
                     : "M";
 
                   return (
-                    <tr key={t.id} className="hover:bg-stone-50/50 transition-colors">
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#e4be9e]/50 text-xs font-semibold text-[#242424]">
+                    <TableRow
+                      key={t.id}
+                      className="hover:bg-muted/50 transition-colors"
+                    >
+                      <TableCell className="px-5 py-3.5">
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-desert/50 text-xs font-semibold text-foreground">
                             {initials}
                           </div>
                           <div>
-                            <p className="font-semibold text-[#242424]">{t.name}</p>
-                            <p className="text-[11px] text-[#71697a]">{t.email}</p>
+                            <p className="font-semibold text-foreground">
+                              {t.name}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {t.email}
+                            </p>
                           </div>
                         </div>
-                      </td>
+                      </TableCell>
 
-                      <td className="px-5 py-3.5 text-[#71697a]">
+                      <TableCell className="px-5 py-3.5 text-muted-foreground">
                         {t.trainerName}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-5 py-3.5 font-mono text-[11px] text-[#71697a]">
+                      <TableCell className="px-5 py-3.5 font-mono text-[11px] text-muted-foreground">
                         {t.trialEndsAt
                           ? format(new Date(t.trialEndsAt), "dd MMM yyyy")
                           : "—"}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-5 py-3.5">
+                      <TableCell className="px-5 py-3.5">
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
                             daysRemaining <= 1
-                              ? "bg-rose-50 text-rose-800"
+                              ? "bg-status-danger-bg text-status-danger-fg"
                               : daysRemaining <= 3
-                              ? "bg-[#e4be9e]/50 text-[#8c5222]"
-                              : "bg-[#d0e1d4]/50 text-emerald-900"
+                                ? "bg-desert/50 text-status-warning-fg"
+                                : "bg-honeydew/50 text-status-active-fg"
                           }`}
                         >
-                          {daysRemaining <= 0 ? "Ends Today" : `${daysRemaining} days left`}
+                          {daysRemaining <= 0
+                            ? "Ends Today"
+                            : `${daysRemaining} days left`}
                         </span>
-                      </td>
+                      </TableCell>
 
-                      <td className="px-5 py-3.5">
+                      <TableCell className="px-5 py-3.5">
                         <StatusBadge status="TRIAL" label="Free Trial" />
-                      </td>
+                      </TableCell>
 
-                      <td className="px-5 py-3.5 text-right">
-                        <button
+                      <TableCell className="px-5 py-3.5 text-right">
+                        <Button
                           type="button"
                           onClick={() => setConvertingCustomer(t)}
-                          className="apple-button-press inline-flex items-center gap-1.5 rounded-full bg-[#242424] px-3.5 py-1 text-xs font-medium text-white shadow-sm hover:bg-[#383838]"
+                          className="apple-button-press inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1 text-xs font-medium text-primary-foreground shadow-sm hover:bg-primary/85"
                         >
                           <Receipt className="h-3 w-3" />
                           <span>Convert to Paid</span>
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   );
                 })
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
 

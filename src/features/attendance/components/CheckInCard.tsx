@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -22,7 +23,11 @@ import {
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { QrCameraScanner, extractQrToken, playPaytmChime } from "./QrCameraScanner";
+import {
+  QrCameraScanner,
+  extractQrToken,
+  playPaytmChime,
+} from "./QrCameraScanner";
 
 interface CheckInCardProps {
   initialToken?: string;
@@ -48,14 +53,16 @@ export function CheckInCard({
     roleNormalized === "TRAINER"
       ? "/trainer"
       : roleNormalized === "ADMIN" || roleNormalized === "SUPER_ADMIN"
-      ? "/admin"
-      : "/customer";
+        ? "/admin"
+        : "/customer";
 
   const [token, setToken] = useState(initialToken);
   const [activeTab, setActiveTab] = useState<"CAMERA" | "MANUAL">("CAMERA");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(
+    null,
+  );
 
   // Success result
   const [checkInSuccess, setCheckInSuccess] = useState<{
@@ -108,7 +115,9 @@ export function CheckInCard({
   const isSimulatorEnabled =
     process.env.NEXT_PUBLIC_ENABLE_GEO_SIMULATOR === "true";
 
-  const applyPreset = (preset: "AT_GYM" | "60M_AWAY" | "5KM_AWAY" | "WEAK_ACCURACY") => {
+  const applyPreset = (
+    preset: "AT_GYM" | "60M_AWAY" | "5KM_AWAY" | "WEAK_ACCURACY",
+  ) => {
     const baseLat = gymCoords?.latitude || 28.528352;
     const baseLng = gymCoords?.longitude || 77.219154;
 
@@ -162,7 +171,10 @@ export function CheckInCard({
             currentLng = coords.longitude;
             currentAcc = coords.accuracy;
           } catch (geoErr: unknown) {
-            const geoMsg = geoErr instanceof Error ? geoErr.message : "GPS permission required";
+            const geoMsg =
+              geoErr instanceof Error
+                ? geoErr.message
+                : "GPS permission required";
             throw new Error(`Location check failed: ${geoMsg}`);
           }
         }
@@ -192,7 +204,11 @@ export function CheckInCard({
             alreadyMarked: res.data.alreadyMarked,
             checkInAt: res.data.checkInAt,
           });
-          toast.success(res.data.alreadyMarked ? "Already checked in today!" : "Attendance verified & recorded!");
+          toast.success(
+            res.data.alreadyMarked
+              ? "Already checked in today!"
+              : "Attendance verified & recorded!",
+          );
 
           // Start 2-second automatic redirect countdown to role dashboard
           setRedirectCountdown(2);
@@ -204,7 +220,8 @@ export function CheckInCard({
         }
       } catch (err: unknown) {
         playPaytmChime(false);
-        const msg = err instanceof Error ? err.message : "Failed to verify attendance.";
+        const msg =
+          err instanceof Error ? err.message : "Failed to verify attendance.";
         setCheckInError(msg);
         toast.error(msg);
       } finally {
@@ -212,7 +229,7 @@ export function CheckInCard({
         setStatusMessage(null);
       }
     },
-    [latitude, longitude, accuracy, requestCoordinates]
+    [latitude, longitude, accuracy, requestCoordinates],
   );
 
   // If page was loaded with a query token ?t=..., auto-execute check-in immediately
@@ -220,7 +237,13 @@ export function CheckInCard({
     if (initialToken && !checkInSuccess && !checkInError && !isSubmitting) {
       executeCheckIn(initialToken);
     }
-  }, [initialToken, executeCheckIn, checkInSuccess, checkInError, isSubmitting]);
+  }, [
+    initialToken,
+    executeCheckIn,
+    checkInSuccess,
+    checkInError,
+    isSubmitting,
+  ]);
 
   // Reset to scan again
   const handleReset = () => {
@@ -242,25 +265,31 @@ export function CheckInCard({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="rounded-3xl border border-[#B5D5BD] bg-white p-7 text-center shadow-[0_8px_30px_rgba(32,78,43,0.08)]"
+            className="rounded-3xl border border-status-active-fg/20 bg-card p-7 text-center shadow-[0_8px_30px_rgba(32,78,43,0.08)]"
           >
             {/* Animated Celebration Icon */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", damping: 14, stiffness: 220 }}
-              className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-honeydew text-[#204E2B] shadow-inner mb-4"
+              className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-honeydew text-status-active-fg shadow-inner mb-4"
             >
               <Check className="h-10 w-10 stroke-[3]" />
             </motion.div>
 
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-honeydew/60 border border-[#B5D5BD] px-3 py-1 text-xs font-semibold text-[#204E2B] mb-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-honeydew/60 border border-status-active-fg/20 px-3 py-1 text-xs font-semibold text-status-active-fg mb-2">
               <ShieldCheck className="h-3.5 w-3.5" />
-              <span>{checkInSuccess.alreadyMarked ? "Already Logged Today" : "Verified & Confirmed"}</span>
+              <span>
+                {checkInSuccess.alreadyMarked
+                  ? "Already Logged Today"
+                  : "Verified & Confirmed"}
+              </span>
             </span>
 
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">
-              {checkInSuccess.alreadyMarked ? "Already Checked In" : "Attendance Recorded!"}
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              {checkInSuccess.alreadyMarked
+                ? "Already Checked In"
+                : "Attendance Recorded!"}
             </h2>
 
             <p className="mt-1 text-xs text-dim max-w-xs mx-auto leading-relaxed">
@@ -269,23 +298,25 @@ export function CheckInCard({
 
             {/* Auto Redirect Banner */}
             {redirectCountdown !== null && (
-              <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-honeydew/40 border border-[#B5D5BD] py-2 px-3 text-xs font-medium text-[#204E2B]">
+              <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-honeydew/40 border border-status-active-fg/20 py-2 px-3 text-xs font-medium text-status-active-fg">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 <span>
-                  Redirecting to {roleNormalized === "TRAINER" ? "Trainer" : "Member"} Dashboard in {redirectCountdown}s...
+                  Redirecting to{" "}
+                  {roleNormalized === "TRAINER" ? "Trainer" : "Member"}{" "}
+                  Dashboard in {redirectCountdown}s...
                 </span>
               </div>
             )}
 
             {/* Facility & Geofence Verification Details */}
-            <div className="mt-5 rounded-2xl bg-[#FAFAF8] border border-border/80 p-4 text-left space-y-2.5">
+            <div className="mt-5 rounded-2xl bg-background border border-border/80 p-4 text-left space-y-2.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-dim">Facility Center</span>
                 <span className="font-semibold text-foreground">{gymName}</span>
               </div>
               <div className="flex items-center justify-between text-xs border-t border-border/50 pt-2">
                 <span className="text-dim">Proximity to Gym</span>
-                <span className="font-mono font-semibold text-[#204E2B] tabular-nums">
+                <span className="font-mono font-semibold text-status-active-fg tabular-nums">
                   {checkInSuccess.distanceMeters}m from entrance
                 </span>
               </div>
@@ -299,23 +330,23 @@ export function CheckInCard({
 
             {/* Action Buttons */}
             <div className="mt-6 flex flex-col gap-2.5">
-              <button
+              <Button
                 type="button"
                 onClick={() => router.push(dashboardRoute)}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground py-3 text-xs font-semibold text-background hover:bg-foreground/90 active:scale-[0.98] transition-all shadow-sm"
               >
                 <Home className="h-4 w-4" />
                 <span>Go to Dashboard Now</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
                 onClick={handleReset}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-border/80 bg-background py-2.5 text-xs font-medium text-foreground hover:bg-surface active:scale-[0.98] transition-all"
               >
                 <RotateCcw className="h-3.5 w-3.5 text-dim" />
                 <span>Scan Another Pass</span>
-              </button>
+              </Button>
             </div>
           </motion.div>
         )}
@@ -330,41 +361,41 @@ export function CheckInCard({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="rounded-3xl border border-rose-200 bg-rose-50/80 p-6 text-center text-rose-950 shadow-sm"
+            className="rounded-3xl border border-rose-200 bg-status-danger-bg/80 p-6 text-center text-rose-950 shadow-sm"
           >
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 text-rose-600 mb-3">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-status-danger-bg text-status-danger-fg mb-3">
               <XCircle className="h-8 w-8 stroke-[2.5]" />
             </div>
 
-            <h3 className="text-base font-bold text-rose-950">
+            <h3 className="text-base font-semibold text-rose-950">
               Check-In Verification Failed
             </h3>
 
-            <p className="mt-2 text-xs font-medium text-rose-900 leading-relaxed max-w-sm mx-auto">
+            <p className="mt-2 text-xs font-medium text-status-danger-fg leading-relaxed max-w-sm mx-auto">
               {checkInError}
             </p>
 
             <div className="mt-5 flex items-center justify-center gap-3">
-              <button
+              <Button
                 type="button"
                 onClick={handleReset}
                 className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-rose-700 active:scale-[0.98] transition-all shadow-sm"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
                 <span>Scan Again</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   setCheckInError(null);
                   setActiveTab("MANUAL");
                 }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-white px-4 py-2.5 text-xs font-medium text-rose-900 hover:bg-rose-50 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-card px-4 py-2.5 text-xs font-medium text-status-danger-fg hover:bg-status-danger-bg transition-all"
               >
                 <Keyboard className="h-3.5 w-3.5" />
                 <span>Manual Entry</span>
-              </button>
+              </Button>
             </div>
           </motion.div>
         )}
@@ -380,63 +411,69 @@ export function CheckInCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-dim">
                 <Radio className="h-4 w-4 text-dim" />
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
+                <span className="text-[11px] font-semibold tracking-wide text-foreground">
                   {gymName}
                 </span>
               </div>
 
               {/* Real-time GPS status pill */}
-              <div className="flex items-center gap-1.5 rounded-full bg-[#F5F5F3] px-2.5 py-0.5 text-[11px] font-medium text-dim tabular-nums">
+              <div className="flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-dim tabular-nums">
                 <MapPin className="h-3 w-3 text-emerald-600" />
                 <span>
-                  {accuracy !== null ? `GPS: ±${Math.round(accuracy)}m` : isLocating ? "Acquiring GPS..." : "GPS Standby"}
+                  {accuracy !== null
+                    ? `GPS: ±${Math.round(accuracy)}m`
+                    : isLocating
+                      ? "Acquiring GPS..."
+                      : "GPS Standby"}
                 </span>
               </div>
             </div>
 
-            <h1 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+            <h1 className="mt-2 text-lg font-semibold tracking-tight text-foreground">
               Scan Reception QR Code
             </h1>
             <p className="mt-0.5 text-xs text-dim">
-              Point your camera at the front desk screen to automatically verify location and record attendance.
+              Point your camera at the front desk screen to automatically verify
+              location and record attendance.
             </p>
           </div>
 
           {/* Mode Switcher Tabs (Paytm Camera vs Manual) */}
-          <div className="mt-4 flex rounded-xl bg-[#F5F5F3] p-1 text-xs">
-            <button
+          <div className="mt-4 flex rounded-xl bg-muted p-1 text-xs">
+            <Button
               type="button"
               onClick={() => setActiveTab("CAMERA")}
               className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-1.5 font-medium transition-all ${
                 activeTab === "CAMERA"
-                  ? "bg-white text-foreground shadow-sm"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-dim hover:text-foreground"
               }`}
             >
               <Camera className="h-3.5 w-3.5" />
               <span>Camera Scanner</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={() => setActiveTab("MANUAL")}
               className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-1.5 font-medium transition-all ${
                 activeTab === "MANUAL"
-                  ? "bg-white text-foreground shadow-sm"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-dim hover:text-foreground"
               }`}
             >
               <Keyboard className="h-3.5 w-3.5" />
               <span>Manual &amp; Dev Presets</span>
-            </button>
+            </Button>
           </div>
 
           {/* Geolocation Permission Error Banner */}
           {geoError && (
-            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50/80 p-3.5 text-xs text-amber-950">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700 mt-0.5" />
+            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-status-warning-bg/80 p-3.5 text-xs text-status-warning-fg">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-status-warning-fg mt-0.5" />
               <div className="leading-relaxed">
-                <span className="font-semibold">Location Access Needed:</span> {geoError}. Enable GPS permissions to mark attendance.
+                <span className="font-semibold">Location Access Needed:</span>{" "}
+                {geoError}. Enable GPS permissions to mark attendance.
               </div>
             </div>
           )}
@@ -453,14 +490,15 @@ export function CheckInCard({
               />
 
               {statusMessage && (
-                <div className="flex items-center justify-center gap-2 text-xs font-medium text-emerald-700 animate-pulse">
+                <div className="flex items-center justify-center gap-2 text-xs font-medium text-status-active-fg animate-pulse">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   <span>{statusMessage}</span>
                 </div>
               )}
 
               <p className="text-center text-[11px] text-dim">
-                The scanner automatically detects the QR code and checks your proximity within 50 meters.
+                The scanner automatically detects the QR code and checks your
+                proximity within 50 meters.
               </p>
             </div>
           )}
@@ -479,10 +517,11 @@ export function CheckInCard({
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   placeholder="Paste or enter token..."
-                  className="w-full rounded-xl border border-border/70 bg-[#F5F5F3] px-3.5 py-2.5 font-mono text-xs text-foreground placeholder:text-dim/60 focus:bg-white focus:border-foreground/30 focus:outline-none transition-all"
+                  className="w-full rounded-xl border border-border/70 bg-muted px-3.5 py-2.5 font-mono text-xs text-foreground placeholder:text-dim/60 focus:bg-card focus:border-foreground/30 focus:outline-none transition-all"
                 />
                 <p className="mt-1.5 text-[11px] text-dim">
-                  Valid for 5 minutes at the reception desk kiosk (`/admin/attendance/qr`).
+                  Valid for 5 minutes at the reception desk kiosk
+                  (`/admin/attendance/qr`).
                 </p>
               </div>
 
@@ -497,39 +536,39 @@ export function CheckInCard({
                     Simulate your physical distance from the facility:
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => applyPreset("AT_GYM")}
-                      className="rounded-xl border border-border bg-white px-3 py-2 text-[11px] font-medium text-foreground hover:bg-stone-50 transition-colors shadow-xs"
+                      className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors shadow-xs"
                     >
                       At Entrance (0m)
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => applyPreset("60M_AWAY")}
-                      className="rounded-xl border border-border bg-white px-3 py-2 text-[11px] font-medium text-foreground hover:bg-stone-50 transition-colors shadow-xs"
+                      className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors shadow-xs"
                     >
                       60m Away (Reject)
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => applyPreset("5KM_AWAY")}
-                      className="rounded-xl border border-border bg-white px-3 py-2 text-[11px] font-medium text-foreground hover:bg-stone-50 transition-colors shadow-xs"
+                      className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors shadow-xs"
                     >
                       5km Away (Reject)
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => applyPreset("WEAK_ACCURACY")}
-                      className="rounded-xl border border-border bg-white px-3 py-2 text-[11px] font-medium text-foreground hover:bg-stone-50 transition-colors shadow-xs"
+                      className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors shadow-xs"
                     >
                       Weak Signal (120m)
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
 
-              <button
+              <Button
                 type="button"
                 onClick={() => executeCheckIn(token)}
                 disabled={isSubmitting || !token}
@@ -546,7 +585,7 @@ export function CheckInCard({
                     <ArrowRight className="h-3.5 w-3.5" />
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           )}
         </div>

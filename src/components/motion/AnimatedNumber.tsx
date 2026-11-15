@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useMotionValue, useSpring, useTransform, motion, useReducedMotion } from "motion/react";
+import {
+  useMotionValue,
+  useSpring,
+  useTransform,
+  motion,
+  useReducedMotion,
+} from "motion/react";
 
 interface AnimatedNumberProps {
   value: number;
@@ -16,7 +22,7 @@ export function AnimatedNumber({
 }: AnimatedNumberProps) {
   const shouldReduceMotion = useReducedMotion();
   const ref = useRef<HTMLSpanElement>(null);
-  const motionVal = useMotionValue(0);
+  const motionVal = useMotionValue(value);
   const springVal = useSpring(motionVal, {
     damping: 30,
     stiffness: 200,
@@ -44,4 +50,3 @@ export function AnimatedNumber({
     </motion.span>
   );
 }
-

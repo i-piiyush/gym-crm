@@ -1,7 +1,7 @@
 import prisma from "@/db/client";
 import { Prisma } from "@prisma/client";
 import { format, addDays } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
 export interface DashboardStats {
   customers: {
@@ -48,7 +48,7 @@ export interface DashboardStats {
  */
 export async function getAdminDashboardStats(
   gymId: string,
-  gymInfo?: { timezone: string; maxCustomers: number }
+  gymInfo?: { timezone: string; maxCustomers: number },
 ): Promise<DashboardStats> {
   const gym =
     gymInfo ??
@@ -61,7 +61,10 @@ export async function getAdminDashboardStats(
   const gymNow = toZonedTime(now, gym.timezone);
   const todayDateStr = format(gymNow, "yyyy-MM-dd");
   const currentMonthStr = format(gymNow, "yyyy-MM");
-  const monthStart = new Date(gymNow.getFullYear(), gymNow.getMonth(), 1);
+  const monthStart = fromZonedTime(
+    new Date(gymNow.getFullYear(), gymNow.getMonth(), 1),
+    gym.timezone,
+  );
   const sevenDaysFromNow = addDays(now, 7);
   const twoDaysFromNow = addDays(now, 2);
 
@@ -170,7 +173,7 @@ export async function getAdminDashboardStats(
   const totalCustomerLoad = activeCustomersCount + pendingInvitesCount;
   const capacityPercentage = Math.min(
     100,
-    Math.round((totalCustomerLoad / gym.maxCustomers) * 100)
+    Math.round((totalCustomerLoad / gym.maxCustomers) * 100),
   );
 
   const overdueMembersList = (s.overdue_members || []).map((m) => ({
@@ -215,4 +218,3 @@ export async function getAdminDashboardStats(
     },
   };
 }
-

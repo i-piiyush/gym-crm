@@ -1,10 +1,24 @@
 "use client";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 import { useState } from "react";
 import { format } from "date-fns";
 import { getReceiptDownloadUrlAction } from "@/actions/payment.actions";
 import { toast } from "sonner";
-import { LuDownload, LuLoader, LuReceipt, LuSearch } from "react-icons/lu";
+import {
+  Download as LuDownload,
+  Loader as LuLoader,
+  Receipt as LuReceipt,
+  Search as LuSearch,
+} from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 
 interface PaymentItem {
@@ -26,7 +40,9 @@ interface CustomerPaymentsTableProps {
   payments: PaymentItem[];
 }
 
-export function CustomerPaymentsTable({ payments }: CustomerPaymentsTableProps) {
+export function CustomerPaymentsTable({
+  payments,
+}: CustomerPaymentsTableProps) {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -78,21 +94,26 @@ export function CustomerPaymentsTable({ payments }: CustomerPaymentsTableProps) 
       {/* Payments Table */}
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
-              <tr>
-                <th className="px-6 py-4">Receipt #</th>
-                <th className="px-6 py-4">Membership Plan</th>
-                <th className="px-6 py-4">Amount Paid</th>
-                <th className="px-6 py-4">Payment Date</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">PDF Invoice</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+          <Table className="w-full text-left text-sm">
+            <TableHeader className="border-b border-border bg-muted/40 text-xs font-semibold tracking-wide text-muted-foreground ">
+              <TableRow>
+                <TableHead className="px-6 py-4">Receipt #</TableHead>
+                <TableHead className="px-6 py-4">Membership Plan</TableHead>
+                <TableHead className="px-6 py-4">Amount Paid</TableHead>
+                <TableHead className="px-6 py-4">Payment Date</TableHead>
+                <TableHead className="px-6 py-4">Status</TableHead>
+                <TableHead className="px-6 py-4 text-right">
+                  PDF Invoice
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-border">
               {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground text-xs">
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="px-6 py-12 text-center text-muted-foreground text-xs"
+                  >
                     <div className="flex flex-col items-center justify-center gap-2">
                       <LuReceipt className="h-8 w-8 text-muted-foreground/40" />
                       <p>
@@ -101,25 +122,27 @@ export function CustomerPaymentsTable({ payments }: CustomerPaymentsTableProps) 
                           : "No payment receipts found."}
                       </p>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 filtered.map((p) => {
                   const isDownloading = downloadingId === p.id;
 
                   return (
-                    <tr
+                    <TableRow
                       key={p.id}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors"
+                      className="hover:bg-muted/30  transition-colors"
                     >
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-xs font-bold text-foreground">
+                      <TableCell className="px-6 py-4">
+                        <span className="font-mono text-xs font-semibold text-foreground">
                           {p.receiptNumber}
                         </span>
-                        <div className="text-[11px] text-muted-foreground">{p.gym.name}</div>
-                      </td>
+                        <div className="text-[11px] text-muted-foreground">
+                          {p.gym.name}
+                        </div>
+                      </TableCell>
 
-                      <td className="px-6 py-4">
+                      <TableCell className="px-6 py-4">
                         <div className="font-semibold text-xs text-foreground">
                           {p.plan?.name || "Membership Plan"}
                         </div>
@@ -128,32 +151,32 @@ export function CustomerPaymentsTable({ payments }: CustomerPaymentsTableProps) 
                             {p.plan.durationDays} days validity
                           </div>
                         )}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-sm font-bold text-foreground">
+                      <TableCell className="px-6 py-4">
+                        <span className="font-mono text-sm font-semibold text-foreground">
                           ₹{Number(p.amount).toLocaleString("en-IN")}
                         </span>
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4 text-xs text-muted-foreground">
+                      <TableCell className="px-6 py-4 text-xs text-muted-foreground">
                         <div className="font-medium text-foreground">
                           {format(new Date(p.paidAt), "dd MMM yyyy")}
                         </div>
                         <div className="text-[11px]">
                           {format(new Date(p.paidAt), "hh:mm a")}
                         </div>
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4">
+                      <TableCell className="px-6 py-4">
                         <StatusBadge status={p.status} label={p.status} />
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4 text-right">
-                        <button
+                      <TableCell className="px-6 py-4 text-right">
+                        <Button
                           onClick={() => handleDownload(p.id)}
                           disabled={isDownloading}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors shadow-sm"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted  disabled:opacity-50 transition-colors shadow-sm"
                         >
                           {isDownloading ? (
                             <LuLoader className="h-3.5 w-3.5 animate-spin" />
@@ -161,17 +184,16 @@ export function CustomerPaymentsTable({ payments }: CustomerPaymentsTableProps) 
                             <LuDownload className="h-3.5 w-3.5 text-primary" />
                           )}
                           <span>Download PDF</span>
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   );
                 })
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
   );
 }
-

@@ -53,7 +53,7 @@ export default async function CheckInPage({ searchParams }: CheckInPageProps) {
             </div>
           </Link>
 
-          <div className="flex items-center gap-1.5 rounded-full bg-honeydew/40 border border-[#B5D5BD] px-2.5 py-1 text-[11px] font-medium text-[#204E2B]">
+          <div className="flex items-center gap-1.5 rounded-full bg-honeydew/40 border border-status-active-fg/20 px-2.5 py-1 text-[11px] font-medium text-status-active-fg">
             <ShieldCheck className="h-3 w-3" />
             <span className="truncate max-w-[120px]">{sync.user.name}</span>
           </div>

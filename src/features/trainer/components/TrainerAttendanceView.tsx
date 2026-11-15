@@ -1,7 +1,20 @@
 "use client";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 import { format } from "date-fns";
-import { LuCalendarCheck, LuClock, LuSearch, LuQrCode } from "react-icons/lu";
+import {
+  CalendarCheck as LuCalendarCheck,
+  Clock as LuClock,
+  Search as LuSearch,
+  QrCode as LuQrCode,
+} from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -17,18 +30,25 @@ interface TrainerAttendanceViewProps {
   attendances: AttendanceRecord[];
 }
 
-export function TrainerAttendanceView({ attendances }: TrainerAttendanceViewProps) {
+export function TrainerAttendanceView({
+  attendances,
+}: TrainerAttendanceViewProps) {
   const [search, setSearch] = useState("");
 
   const filtered = attendances.filter((a) => {
     const q = search.toLowerCase();
-    const formatted = format(new Date(a.checkInAt), "EEEE dd MMMM yyyy").toLowerCase();
+    const formatted = format(
+      new Date(a.checkInAt),
+      "EEEE dd MMMM yyyy",
+    ).toLowerCase();
     return formatted.includes(q) || a.date.includes(q);
   });
 
   const now = new Date();
   const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const thisMonthCount = attendances.filter((a) => a.date.startsWith(currentMonthPrefix)).length;
+  const thisMonthCount = attendances.filter((a) =>
+    a.date.startsWith(currentMonthPrefix),
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -41,10 +61,12 @@ export function TrainerAttendanceView({ attendances }: TrainerAttendanceViewProp
             </span>
             <LuCalendarCheck className="h-4 w-4 text-primary" />
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-foreground">
+          <p className="mt-2 text-2xl font-semibold font-mono text-foreground">
             {attendances.length}
           </p>
-          <span className="text-[11px] text-muted-foreground">All-time GPS verified staff check-ins</span>
+          <span className="text-[11px] text-muted-foreground">
+            All-time GPS verified staff check-ins
+          </span>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -52,12 +74,14 @@ export function TrainerAttendanceView({ attendances }: TrainerAttendanceViewProp
             <span className="text-xs font-semibold text-muted-foreground uppercase">
               Shifts This Month
             </span>
-            <LuClock className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <LuClock className="h-4 w-4 text-emerald-600 " />
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+          <p className="mt-2 text-2xl font-semibold font-mono text-emerald-600 ">
             {thisMonthCount}
           </p>
-          <span className="text-[11px] text-muted-foreground">Recorded this calendar month</span>
+          <span className="text-[11px] text-muted-foreground">
+            Recorded this calendar month
+          </span>
         </div>
       </div>
 
@@ -86,60 +110,64 @@ export function TrainerAttendanceView({ attendances }: TrainerAttendanceViewProp
       {/* Attendance Logs Table */}
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
-              <tr>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Check-in Time</th>
-                <th className="px-6 py-4">Facility Distance</th>
-                <th className="px-6 py-4">GPS Accuracy</th>
-                <th className="px-6 py-4 text-right">Verification</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+          <Table className="w-full text-left text-sm">
+            <TableHeader className="border-b border-border bg-muted/40 text-xs font-semibold tracking-wide text-muted-foreground ">
+              <TableRow>
+                <TableHead className="px-6 py-4">Date</TableHead>
+                <TableHead className="px-6 py-4">Check-in Time</TableHead>
+                <TableHead className="px-6 py-4">Facility Distance</TableHead>
+                <TableHead className="px-6 py-4">GPS Accuracy</TableHead>
+                <TableHead className="px-6 py-4 text-right">
+                  Verification
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-border">
               {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-xs">
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="px-6 py-12 text-center text-muted-foreground text-xs"
+                  >
                     {search
                       ? "No records match your search."
                       : "No check-in logs found yet."}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 filtered.map((a) => (
-                  <tr
+                  <TableRow
                     key={a.id}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors"
+                    className="hover:bg-muted/30  transition-colors"
                   >
-                    <td className="px-6 py-4 font-semibold text-foreground text-xs">
+                    <TableCell className="px-6 py-4 font-semibold text-foreground text-xs">
                       {format(new Date(a.checkInAt), "EEEE, dd MMMM yyyy")}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-6 py-4 text-xs font-mono text-foreground">
+                    <TableCell className="px-6 py-4 text-xs font-mono text-foreground">
                       {format(new Date(a.checkInAt), "hh:mm:ss a")}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-6 py-4 text-xs font-mono text-muted-foreground">
+                    <TableCell className="px-6 py-4 text-xs font-mono text-muted-foreground">
                       {Number(a.distanceMeters).toFixed(1)}m from center
-                    </td>
+                    </TableCell>
 
-                    <td className="px-6 py-4 text-xs font-mono text-muted-foreground">
+                    <TableCell className="px-6 py-4 text-xs font-mono text-muted-foreground">
                       ±{Number(a.accuracyMeters).toFixed(1)}m
-                    </td>
+                    </TableCell>
 
-                    <td className="px-6 py-4 text-right">
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40">
+                    <TableCell className="px-6 py-4 text-right">
+                      <span className="inline-flex items-center rounded-full bg-status-active-bg px-2.5 py-0.5 text-[11px] font-semibold text-status-active-fg border border-emerald-200   ">
                         Verified
                       </span>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
   );
 }
-

@@ -11,6 +11,8 @@ import {
   Clock,
   LucideIcon,
   HelpCircle,
+  ChartNoAxesCombined,
+  Dumbbell,
 } from "lucide-react";
 import { UserRoleType } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
@@ -48,7 +50,7 @@ export const ADMIN_NAV_SECTIONS: NavSection[] = [
         icon: Users,
       },
       {
-        title: "Leads & Trials",
+        title: "Leads & trials",
         href: ROUTES.ADMIN.TRIALS,
         icon: Hourglass,
       },
@@ -58,7 +60,7 @@ export const ADMIN_NAV_SECTIONS: NavSection[] = [
         icon: CalendarCheck2,
       },
       {
-        title: "Subscriptions",
+        title: "Memberships",
         href: ROUTES.ADMIN.SUBSCRIPTIONS,
         icon: Clock,
       },
@@ -72,6 +74,8 @@ export const ADMIN_NAV_SECTIONS: NavSection[] = [
   {
     title: "OPERATIONS",
     items: [
+      { title: "Staff", href: "/admin/staff", icon: Dumbbell },
+      { title: "Reports", href: "/admin/reports", icon: ChartNoAxesCombined },
       {
         title: "Attendance QR",
         href: ROUTES.ADMIN.ATTENDANCE_QR,

@@ -1,4 +1,6 @@
 "use client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +10,11 @@ import { createGymSchema, CreateGymInput } from "@/schemas/gym.schema";
 import { createGymAction } from "@/actions/gym.actions";
 import { PressableButton } from "@/components/motion/PressableButton";
 import { toast } from "sonner";
-import { LuMapPin, LuExternalLink, LuClipboardCopy } from "react-icons/lu";
+import {
+  MapPin as LuMapPin,
+  ExternalLink as LuExternalLink,
+  ClipboardCopy as LuClipboardCopy,
+} from "lucide-react";
 
 export function CreateGymForm() {
   const router = useRouter();
@@ -54,7 +60,9 @@ export function CreateGymForm() {
       if (!isNaN(lat) && !isNaN(lng)) {
         setValue("latitude", Number(lat.toFixed(6)), { shouldValidate: true });
         setValue("longitude", Number(lng.toFixed(6)), { shouldValidate: true });
-        toast.success(`Coordinates extracted: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        toast.success(
+          `Coordinates extracted: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+        );
       }
     }
   };
@@ -83,11 +91,14 @@ export function CreateGymForm() {
 
   return (
     <form
+      noValidate
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-6 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8"
     >
       <div className="border-b border-border pb-4">
-        <h2 className="text-lg font-bold text-foreground">Gym Information</h2>
+        <h2 className="text-lg font-semibold text-foreground">
+          Gym Information
+        </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
           Basic tenant details and receipt configuration.
         </p>
@@ -95,40 +106,75 @@ export function CreateGymForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="block text-xs font-semibold text-foreground mb-1.5">
+          <label
+            htmlFor="register-name"
+            className="block text-xs font-semibold text-foreground mb-1.5"
+          >
             Gym Name <span className="text-destructive">*</span>
           </label>
-          <input
+          <Input
+            aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? "register-name-error" : undefined}
+            id="register-name"
             {...register("name")}
             type="text"
             placeholder="e.g. Iron Peak Fitness"
             className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
           {errors.name && (
-            <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>
+            <p
+              id="register-name-error"
+              role="alert"
+              className="mt-1 text-xs text-destructive"
+            >
+              {errors.name.message}
+            </p>
           )}
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-xs font-semibold text-foreground mb-1.5">
-            Facility Physical Address <span className="text-destructive">*</span>
+          <label
+            htmlFor="register-address"
+            className="block text-xs font-semibold text-foreground mb-1.5"
+          >
+            Facility Physical Address{" "}
+            <span className="text-destructive">*</span>
           </label>
           <textarea
+            aria-invalid={!!errors.address}
+            aria-describedby={
+              errors.address ? "register-address-error" : undefined
+            }
+            id="register-address"
             {...register("address")}
             rows={2}
             placeholder="e.g. Select Citywalk, Saket District Centre, New Delhi, Delhi 110017"
             className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
           {errors.address && (
-            <p className="mt-1 text-xs text-destructive">{errors.address.message}</p>
+            <p
+              id="register-address-error"
+              role="alert"
+              className="mt-1 text-xs text-destructive"
+            >
+              {errors.address.message}
+            </p>
           )}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-foreground mb-1.5">
+          <label
+            htmlFor="register-receiptPrefix"
+            className="block text-xs font-semibold text-foreground mb-1.5"
+          >
             Receipt Prefix <span className="text-destructive">*</span>
           </label>
-          <input
+          <Input
+            aria-invalid={!!errors.receiptPrefix}
+            aria-describedby={
+              errors.receiptPrefix ? "register-receiptPrefix-error" : undefined
+            }
+            id="register-receiptPrefix"
             {...register("receiptPrefix")}
             type="text"
             placeholder="REC"
@@ -139,17 +185,29 @@ export function CreateGymForm() {
             Prefix for generated receipts (e.g. REC-2026-00001)
           </p>
           {errors.receiptPrefix && (
-            <p className="mt-1 text-xs text-destructive">
+            <p
+              id="register-receiptPrefix-error"
+              role="alert"
+              className="mt-1 text-xs text-destructive"
+            >
               {errors.receiptPrefix.message}
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-foreground mb-1.5">
+          <label
+            htmlFor="register-maxCustomers"
+            className="block text-xs font-semibold text-foreground mb-1.5"
+          >
             Customer Capacity Limit
           </label>
-          <input
+          <Input
+            aria-invalid={!!errors.maxCustomers}
+            aria-describedby={
+              errors.maxCustomers ? "register-maxCustomers-error" : undefined
+            }
+            id="register-maxCustomers"
             {...register("maxCustomers", { valueAsNumber: true })}
             type="number"
             defaultValue={50}
@@ -161,7 +219,11 @@ export function CreateGymForm() {
             Default limit is 50 members per tenant
           </p>
           {errors.maxCustomers && (
-            <p className="mt-1 text-xs text-destructive">
+            <p
+              id="register-maxCustomers-error"
+              role="alert"
+              className="mt-1 text-xs text-destructive"
+            >
               {errors.maxCustomers.message}
             </p>
           )}
@@ -172,16 +234,17 @@ export function CreateGymForm() {
       <div className="border-t border-border pt-6">
         <div className="flex items-center gap-2 mb-1">
           <LuMapPin className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-bold text-foreground">
+          <h2 className="text-sm font-semibold text-foreground">
             Attendance GPS Geofence (Super Admin Only)
           </h2>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          GPS coordinates must be configured manually by platform administrators. Gym owners see coordinates read-only.
+          GPS coordinates must be configured manually by platform
+          administrators. Gym owners see coordinates read-only.
         </p>
 
         {/* Quick paste helper */}
-        <div className="mb-4 rounded-xl border border-dashed border-border bg-slate-50/70 p-3.5 dark:bg-slate-900/50">
+        <div className="mb-4 rounded-xl border border-dashed border-border bg-muted/40 p-3.5 ">
           <label className="block text-xs font-semibold text-foreground mb-1">
             <span className="flex items-center gap-1.5">
               <LuClipboardCopy className="h-3.5 w-3.5 text-primary" />
@@ -196,25 +259,34 @@ export function CreateGymForm() {
               placeholder="e.g. 28.528352, 77.219154"
               className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
-            <button
+            <Button
               type="button"
               onClick={() => handleAutoSplit(pasteString)}
-              className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-slate-200"
+              className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-muted"
             >
               Split
-            </button>
+            </Button>
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            Right-click any location on Google Maps to copy &quot;lat, lng&quot;, then paste here.
+            Right-click any location on Google Maps to copy &quot;lat,
+            lng&quot;, then paste here.
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <label className="block text-xs font-semibold text-foreground mb-1.5">
+            <label
+              htmlFor="register-latitude"
+              className="block text-xs font-semibold text-foreground mb-1.5"
+            >
               Latitude (-90 to 90) <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
+              aria-invalid={!!errors.latitude}
+              aria-describedby={
+                errors.latitude ? "register-latitude-error" : undefined
+              }
+              id="register-latitude"
               {...register("latitude", { valueAsNumber: true })}
               type="number"
               step="any"
@@ -222,15 +294,30 @@ export function CreateGymForm() {
               className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary font-mono"
             />
             {errors.latitude && (
-              <p className="mt-1 text-xs text-destructive">{errors.latitude.message}</p>
+              <p
+                id="register-latitude-error"
+                role="alert"
+                className="mt-1 text-xs text-destructive"
+              >
+                {errors.latitude.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-foreground mb-1.5">
-              Longitude (-180 to 180) <span className="text-destructive">*</span>
+            <label
+              htmlFor="register-longitude"
+              className="block text-xs font-semibold text-foreground mb-1.5"
+            >
+              Longitude (-180 to 180){" "}
+              <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
+              aria-invalid={!!errors.longitude}
+              aria-describedby={
+                errors.longitude ? "register-longitude-error" : undefined
+              }
+              id="register-longitude"
               {...register("longitude", { valueAsNumber: true })}
               type="number"
               step="any"
@@ -238,15 +325,31 @@ export function CreateGymForm() {
               className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary font-mono"
             />
             {errors.longitude && (
-              <p className="mt-1 text-xs text-destructive">{errors.longitude.message}</p>
+              <p
+                id="register-longitude-error"
+                role="alert"
+                className="mt-1 text-xs text-destructive"
+              >
+                {errors.longitude.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-foreground mb-1.5">
+            <label
+              htmlFor="register-attendanceRadiusMeters"
+              className="block text-xs font-semibold text-foreground mb-1.5"
+            >
               Attendance Radius (Meters)
             </label>
-            <input
+            <Input
+              aria-invalid={!!errors.attendanceRadiusMeters}
+              aria-describedby={
+                errors.attendanceRadiusMeters
+                  ? "register-attendanceRadiusMeters-error"
+                  : undefined
+              }
+              id="register-attendanceRadiusMeters"
               {...register("attendanceRadiusMeters", { valueAsNumber: true })}
               type="number"
               defaultValue={50}
@@ -255,7 +358,11 @@ export function CreateGymForm() {
               className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             {errors.attendanceRadiusMeters && (
-              <p className="mt-1 text-xs text-destructive">
+              <p
+                id="register-attendanceRadiusMeters-error"
+                role="alert"
+                className="mt-1 text-xs text-destructive"
+              >
                 {errors.attendanceRadiusMeters.message}
               </p>
             )}
@@ -279,25 +386,38 @@ export function CreateGymForm() {
 
       {/* Gym Owner Invitation Section */}
       <div className="border-t border-border pt-6">
-        <h2 className="text-sm font-bold text-foreground">
+        <h2 className="text-sm font-semibold text-foreground">
           Gym Owner Invitation (Admin)
         </h2>
         <p className="text-xs text-muted-foreground mb-4">
-          An invitation will be dispatched to this email. When the owner signs in, they will be bound to this gym automatically.
+          An invitation will be dispatched to this email. When the owner signs
+          in, they will be bound to this gym automatically.
         </p>
 
         <div>
-          <label className="block text-xs font-semibold text-foreground mb-1.5">
+          <label
+            htmlFor="register-ownerEmail"
+            className="block text-xs font-semibold text-foreground mb-1.5"
+          >
             Gym Owner Email Address <span className="text-destructive">*</span>
           </label>
-          <input
+          <Input
+            aria-invalid={!!errors.ownerEmail}
+            aria-describedby={
+              errors.ownerEmail ? "register-ownerEmail-error" : undefined
+            }
+            id="register-ownerEmail"
             {...register("ownerEmail")}
             type="email"
             placeholder="owner@ironpeak.com"
             className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
           {errors.ownerEmail && (
-            <p className="mt-1 text-xs text-destructive">
+            <p
+              id="register-ownerEmail-error"
+              role="alert"
+              className="mt-1 text-xs text-destructive"
+            >
               {errors.ownerEmail.message}
             </p>
           )}
@@ -313,11 +433,14 @@ export function CreateGymForm() {
         >
           Cancel
         </PressableButton>
-        <PressableButton type="submit" variant="primary" disabled={isSubmitting}>
+        <PressableButton
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Creating Gym..." : "Create Gym & Invite Owner"}
         </PressableButton>
       </div>
     </form>
   );
 }
-

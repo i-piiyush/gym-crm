@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 
 import { useState, useEffect, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
@@ -22,7 +23,9 @@ export function QrCodeStation({
   appUrl,
 }: QrCodeStationProps) {
   const [token, setToken] = useState(initialToken);
-  const [secondsRemaining, setSecondsRemaining] = useState(initialSecondsRemaining);
+  const [secondsRemaining, setSecondsRemaining] = useState(
+    initialSecondsRemaining,
+  );
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Dynamic base URL resolution for mobile scanners:
@@ -33,7 +36,11 @@ export function QrCodeStation({
 
   useEffect(() => {
     const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, "");
-    if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+    if (
+      envUrl &&
+      !envUrl.includes("localhost") &&
+      !envUrl.includes("127.0.0.1")
+    ) {
       setResolvedBaseUrl(envUrl);
     } else if (
       typeof window !== "undefined" &&
@@ -79,7 +86,9 @@ export function QrCodeStation({
   // Toggle fullscreen mode
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true));
+      document.documentElement
+        .requestFullscreen()
+        .then(() => setIsFullscreen(true));
     } else {
       document.exitFullscreen().then(() => setIsFullscreen(false));
     }
@@ -90,29 +99,29 @@ export function QrCodeStation({
   return (
     <div
       className={`flex flex-col items-center justify-center transition-all ${
-        isFullscreen
-          ? "fixed inset-0 z-50 bg-[#FAFAF8] p-8"
-          : "apple-card p-8"
+        isFullscreen ? "fixed inset-0 z-50 bg-background p-8" : "apple-card p-8"
       }`}
     >
       {/* Station Header */}
-      <div className="flex w-full items-center justify-between border-b border-[rgba(40,40,40,0.06)] pb-4">
+      <div className="flex w-full items-center justify-between border-b border-border pb-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#242424] text-white shadow-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
             <QrCode className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-base font-semibold text-[#242424]">{gymName}</h1>
-            <p className="text-xs text-[#71697a]">
+            <h1 className="text-base font-semibold text-foreground">
+              {gymName}
+            </h1>
+            <p className="text-xs text-muted-foreground">
               Reception Check-in Station • 5-Minute Dynamic Geofence QR
             </p>
           </div>
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={toggleFullscreen}
-          className="apple-button-press inline-flex items-center gap-1.5 rounded-full border border-[rgba(40,40,40,0.08)] bg-white px-3.5 py-1.5 text-xs font-medium text-[#242424] hover:bg-stone-50"
+          className="apple-button-press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
         >
           {isFullscreen ? (
             <>
@@ -125,12 +134,12 @@ export function QrCodeStation({
               <span>Fullscreen Kiosk</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Main QR Display */}
       <div className="my-8 flex flex-col items-center justify-center">
-        <div className="relative rounded-3xl border-4 border-stone-200/80 bg-white p-6 shadow-xl">
+        <div className="relative rounded-3xl border-4 border-border bg-white p-6 shadow-xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={token}
@@ -150,7 +159,7 @@ export function QrCodeStation({
         </div>
 
         {/* Target URL Badge */}
-        <div className="mt-3 flex items-center gap-1.5 rounded-full bg-slate-100/80 dark:bg-slate-800/60 px-3 py-1 text-[11px] font-mono text-[#71697a] border border-border/40">
+        <div className="mt-3 flex items-center gap-1.5 rounded-full bg-muted/80  px-3 py-1 text-[11px] font-mono text-muted-foreground border border-border/40">
           <Link2 className="h-3 w-3 text-dim" />
           <span className="truncate max-w-[280px]">
             {checkInUrl.split("?")[0]}
@@ -166,10 +175,10 @@ export function QrCodeStation({
             strokeWidth={3.5}
           />
           <div className="flex flex-col text-left">
-            <span className="text-xs font-semibold text-[#242424]">
+            <span className="text-xs font-semibold text-foreground">
               Rotates every 5 minutes
             </span>
-            <span className="text-[11px] text-[#71697a] font-mono">
+            <span className="text-[11px] text-muted-foreground font-mono">
               HMAC-SHA256 hardware token
             </span>
           </div>
@@ -177,10 +186,12 @@ export function QrCodeStation({
       </div>
 
       {/* Instructions Banner */}
-      <div className="flex max-w-md items-center gap-3 rounded-2xl border border-[rgba(40,40,40,0.06)] bg-[#d0e1d4]/30 p-4 text-xs text-emerald-950">
-        <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-800" />
+      <div className="flex max-w-md items-center gap-3 rounded-2xl border border-border bg-honeydew/30 p-4 text-xs text-status-active-fg">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-status-active-fg" />
         <p className="leading-relaxed">
-          Members &amp; trainers: Scan this QR with your mobile camera. Your phone will verify you are within the facility geofence to log attendance.
+          Members &amp; trainers: Scan this QR with your mobile camera. Your
+          phone will verify you are within the facility geofence to log
+          attendance.
         </p>
       </div>
     </div>

@@ -18,15 +18,15 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-[rgba(40,40,40,0.1)] bg-white/60 p-8 text-center sm:p-12 ${
+      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center sm:p-12 ${
         className || ""
       }`}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-100 text-[#71697a] border border-[rgba(40,40,40,0.05)] shadow-sm">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground border border-border shadow-sm">
         <Icon className="h-5 w-5" />
       </div>
-      <h3 className="mt-4 text-sm font-semibold text-[#242424]">{title}</h3>
-      <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-[#71697a]">
+      <h3 className="mt-4 text-sm font-semibold text-foreground">{title}</h3>
+      <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-muted-foreground">
         {description}
       </p>
       {action && <div className="mt-5">{action}</div>}

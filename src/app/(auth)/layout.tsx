@@ -1,38 +1,60 @@
 import { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
+import { ArrowLeft, Check } from "lucide-react";
+import { Brand } from "@/components/shared/Brand";
+import { MemberPreview } from "@/features/marketing/components/ProductPreview";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
-      {/* Back to home shortcut */}
-      <Link
-        href="/"
-        className="absolute top-6 left-6 inline-flex items-center gap-1.5 text-xs font-medium text-dim hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        <span>Return to GYM-OS</span>
-      </Link>
-
-      <div className="mb-8 flex flex-col items-center text-center">
-        <Link href="/" className="flex items-center gap-2.5 group mb-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-foreground text-background shadow-sm transition-transform group-hover:scale-105">
-            <span className="font-semibold text-sm tracking-tight text-background">G</span>
+    <div className="grid min-h-dvh bg-card lg:grid-cols-2">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-secondary p-12 lg:flex xl:p-16">
+        <Brand />
+        <div className="my-12 max-w-lg">
+          <p className="text-xs text-dim">YOUR GYM. IN PERFECT SYNC.</p>
+          <h1 className="mt-5 text-[48px] font-semibold leading-[1.1] tracking-[-2px]">
+            A little less admin.
+            <br />
+            <span className="text-muted-foreground">A lot more possibility.</span>
+          </h1>
+          <p className="mt-6 max-w-sm text-sm leading-[1.8] text-dim">
+            One thoughtful workspace for the people, payments, and everyday
+            moments that make your gym.
+          </p>
+          <div className="mt-9">
+            <MemberPreview small />
           </div>
-          <span className="text-xl font-semibold tracking-tight text-foreground">
-            GYM-OS
-          </span>
-        </Link>
-        <p className="text-xs text-dim">
-          Your gym. In perfect sync.
+          <p className="mt-3 text-[10px] text-dim">
+            Illustrative product preview
+          </p>
+        </div>
+        <p className="flex items-center gap-2 text-xs text-dim">
+          <Check className="size-3.5" />
+          Built for the way your gym works.
         </p>
-      </div>
-
-      <div className="w-full max-w-md">{children}</div>
-
-      <div className="mt-8 text-center text-[11px] text-dim/60">
-        © {new Date().getFullYear()} GYM-OS Systems Inc. All rights reserved.
-      </div>
+      </aside>
+      <main className="relative flex flex-col items-center justify-center px-5 py-24 sm:px-10">
+        <div className="absolute right-6 top-5"><ThemeToggle /></div>
+        <Link
+          href="/?preview=true"
+          className="absolute left-6 top-7 flex items-center gap-2 text-xs text-dim hover:text-foreground"
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to home
+        </Link>
+        <div className="mb-8 lg:hidden">
+          <Brand />
+        </div>
+        <div className="w-full max-w-[400px]">{children}</div>
+        <p className="mt-7 max-w-sm text-center text-[11px] leading-relaxed text-dim">
+          GYM-OS workspaces are invitation-based. Use the email your gym
+          invited.
+        </p>
+        <div className="mt-6 flex gap-5 text-[11px] text-dim">
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/help">Need a hand?</Link>
+        </div>
+      </main>
     </div>
   );
 }

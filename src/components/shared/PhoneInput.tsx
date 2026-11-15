@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface PhoneInputProps
@@ -25,10 +26,10 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
     return (
       <div>
         <div className="relative flex rounded-lg shadow-sm">
-          <span className="inline-flex items-center rounded-l-lg border border-r-0 border-input bg-slate-50 px-3 text-xs font-semibold text-muted-foreground dark:bg-slate-900">
+          <span className="inline-flex items-center rounded-l-lg border border-r-0 border-border bg-muted px-3 text-xs font-semibold text-muted-foreground ">
             +91
           </span>
-          <input
+          <Input
             {...props}
             ref={ref}
             type="tel"
@@ -36,17 +37,17 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
             onChange={handleTextChange}
             placeholder="98765 43210"
             className={cn(
-              "block w-full rounded-r-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
-              error && "border-destructive focus:border-destructive focus:ring-destructive",
-              className
+              "block w-full rounded-r-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
+              error &&
+                "border-destructive focus:border-destructive focus:ring-destructive",
+              className,
             )}
           />
         </div>
         {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
       </div>
     );
-  }
+  },
 );
 
 PhoneInput.displayName = "PhoneInput";
-

@@ -35,7 +35,7 @@ export default async function NotInvitedPage() {
 
       <div className="w-full max-w-md rounded-2xl border border-border/80 bg-surface p-7 shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-desert/25 text-foreground mb-4">
-          <ShieldAlert className="h-6 w-6 text-[#8F5A38]" />
+          <ShieldAlert className="h-6 w-6 text-status-warning-fg" />
         </div>
 
         <h2 className="text-lg font-semibold tracking-tight text-foreground">
@@ -46,7 +46,7 @@ export default async function NotInvitedPage() {
           The email <span className="font-semibold text-foreground">{email || "you signed in with"}</span> has not been enrolled or invited by any gym administrator.
         </p>
 
-        <div className="mt-5 rounded-xl bg-[#F5F5F3]/70 p-4 text-xs text-dim text-left border border-border/60">
+        <div className="mt-5 rounded-xl bg-muted/70 p-4 text-xs text-dim text-left border border-border/60">
           <p className="font-medium text-foreground mb-1.5">Next Steps:</p>
           <ul className="list-disc pl-4 space-y-1">
             <li>Contact your gym reception or manager to add your profile.</li>

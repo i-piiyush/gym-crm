@@ -7,7 +7,11 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/accept-invitation",
   "/not-invited",
+  "/help",
+  "/privacy",
+  "/terms",
   "/api/webhooks(.*)",
   "/api/receipts/(.*)",
 ]);
@@ -28,7 +32,8 @@ export default clerkMiddleware(
     if (userId && isHome && !isPreview) {
       const metadata =
         (sessionClaims?.publicMetadata as ClerkPublicMetadata) ||
-        ((sessionClaims as Record<string, unknown>)?.metadata as ClerkPublicMetadata) ||
+        ((sessionClaims as Record<string, unknown>)
+          ?.metadata as ClerkPublicMetadata) ||
         {};
       const role = metadata.role;
 
@@ -53,7 +58,8 @@ export default clerkMiddleware(
 
     const metadata =
       (sessionClaims?.publicMetadata as ClerkPublicMetadata) ||
-      ((sessionClaims as Record<string, unknown>)?.metadata as ClerkPublicMetadata) ||
+      ((sessionClaims as Record<string, unknown>)
+        ?.metadata as ClerkPublicMetadata) ||
       {};
     const role = metadata.role;
 
@@ -86,7 +92,7 @@ export default clerkMiddleware(
   },
   {
     clockSkewInMs: 60000,
-  }
+  },
 );
 
 export const config = {

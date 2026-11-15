@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   serverExternalPackages: ["pdfkit", "nodemailer", "@prisma/client"],
   experimental: {
     optimizePackageImports: ["react-icons", "date-fns", "date-fns-tz"],
@@ -14,4 +15,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-

@@ -7,6 +7,7 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/features/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/config/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     container: {
@@ -17,7 +18,19 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "SF Pro Display",
+          "SF Pro Text",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+      },
       colors: {
+        dim: "hsl(var(--muted-foreground) / <alpha-value>)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -25,27 +38,27 @@ const config: Config = {
         foreground: "hsl(var(--foreground))",
         surface: "hsl(var(--surface))",
         cream: {
-          DEFAULT: "#f2f6d0",
+          DEFAULT: "hsl(var(--brand-cream) / <alpha-value>)",
           50: "#fafceb",
           100: "#f2f6d0",
           200: "#e6eebd",
           300: "#d6e2a1",
         },
         honeydew: {
-          DEFAULT: "#d0e1d4",
+          DEFAULT: "hsl(var(--brand-honeydew) / <alpha-value>)",
           50: "#f4f8f5",
           100: "#d0e1d4",
           200: "#b5d0bc",
           300: "#98bfa2",
         },
         sand: {
-          DEFAULT: "#d9d2b6",
+          DEFAULT: "hsl(var(--brand-sand) / <alpha-value>)",
           50: "#f7f6f0",
           100: "#d9d2b6",
           200: "#c7bda0",
         },
         desert: {
-          DEFAULT: "#e4be9e",
+          DEFAULT: "hsl(var(--brand-desert) / <alpha-value>)",
           50: "#faf3ed",
           100: "#e4be9e",
           200: "#d5a37b",
@@ -108,4 +121,3 @@ const config: Config = {
 };
 
 export default config;
-

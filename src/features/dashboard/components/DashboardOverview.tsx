@@ -1,370 +1,283 @@
 "use client";
-
-import { DashboardStats } from "@/services/dashboard.service";
-import { StatCard } from "@/components/shared/StatCard";
+import type { DashboardStats } from "@/services/dashboard.service";
+import type { DashboardInsights } from "@/services/insights.service";
 import Link from "next/link";
 import {
   Users,
   CalendarCheck2,
   CreditCard,
-  AlertTriangle,
-  QrCode,
-  UserPlus,
-  Receipt,
-  ArrowRight,
   Clock,
-  CheckCircle2,
-  Sparkles,
-  TrendingUp,
+  Plus,
+  ArrowUpRight,
+  ArrowRight,
+  Check,
+  UserRoundPlus,
+  Receipt,
+  QrCode,
 } from "lucide-react";
-
-interface DashboardOverviewProps {
-  stats: DashboardStats;
-  gymName: string;
-  greeting?: string;
-  dateStr?: string;
-}
-
+import { formatDistanceToNow } from "date-fns";
+import { Button } from "@/components/ui/button";
+import {
+  AttendanceChart,
+  RevenueChart,
+  MembershipChart,
+} from "./OverviewCharts";
 export function DashboardOverview({
   stats,
+  insights,
   gymName,
   greeting = "Good morning.",
   dateStr,
-}: DashboardOverviewProps) {
-  const hasAlerts =
-    stats.needsAttention.trialsEndingSoon.length > 0 ||
-    stats.needsAttention.overdueMembers.length > 0 ||
-    stats.needsAttention.pendingSalaries.count > 0;
-
+}: {
+  stats: DashboardStats;
+  insights: DashboardInsights;
+  gymName: string;
+  greeting?: string;
+  dateStr?: string;
+}) {
+  const change = insights.revenueChange;
+  const metrics = [
+    {
+      title: "Active members",
+      value: insights.memberships.active.toLocaleString(),
+      icon: Users,
+      detail: `${stats.customers.total} of ${stats.customers.max} member capacity`,
+      positive: false,
+    },
+    {
+      title: "Today’s attendance",
+      value: stats.presentTodayCount.toLocaleString(),
+      icon: CalendarCheck2,
+      detail: "Verified check-ins today",
+      positive: true,
+    },
+    {
+      title: "Monthly revenue",
+      value: `₹${stats.monthlyRevenue.toLocaleString("en-IN")}`,
+      icon: CreditCard,
+      detail:
+        change === null
+          ? "Collected this month"
+          : `${change >= 0 ? "+" : ""}${change}% vs. last month`,
+      positive: change !== null && change >= 0,
+    },
+    {
+      title: "Pending payments",
+      value: `₹${insights.pendingPayments.amount.toLocaleString("en-IN")}`,
+      icon: Clock,
+      detail: `${insights.pendingPayments.count} pending ${insights.pendingPayments.count === 1 ? "payment" : "payments"}`,
+      positive: false,
+    },
+  ];
   return (
-    <div className="space-y-8 pb-10">
-      {/* -------------------------------------------------------------------- */}
-      {/* 1. APPLE-STYLE DASHBOARD GREETING */}
-      {/* -------------------------------------------------------------------- */}
-      <div className="flex flex-col justify-between gap-4 border-b border-[rgba(40,40,40,0.06)] pb-6 sm:flex-row sm:items-end">
+    <div className="space-y-7 pb-5">
+      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[#242424] sm:text-4xl">
+          <p className="mb-2 text-xs text-dim">{dateStr}</p>
+          <h1 className="text-[32px] font-semibold leading-tight tracking-[-1.1px] sm:text-[36px]">
             {greeting}
           </h1>
-          <p className="mt-1.5 text-xs sm:text-sm text-[#71697a]">
-            Here’s what’s happening at <span className="font-medium text-[#242424]">{gymName}</span> today
-            {dateStr && <span> • {dateStr}</span>}.
+          <p className="mt-2 text-sm text-dim">
+            Here’s what’s happening at{" "}
+            <span className="font-medium text-foreground">{gymName}</span>{" "}
+            today.
           </p>
         </div>
-
-        <div className="flex items-center gap-2.5">
-          <Link
-            href="/admin/attendance/qr"
-            className="apple-button-press inline-flex items-center gap-2 rounded-full border border-[rgba(40,40,40,0.08)] bg-white px-4 py-2 text-xs font-medium text-[#242424] shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:bg-stone-50"
-          >
-            <QrCode className="h-3.5 w-3.5 text-[#71697a]" />
-            <span>Launch QR Station</span>
-          </Link>
-
-          <Link
-            href="/admin/people"
-            className="apple-button-press inline-flex items-center gap-2 rounded-full bg-[#242424] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#383838]"
-          >
-            <UserPlus className="h-3.5 w-3.5" />
-            <span>Add Member</span>
-          </Link>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/admin/attendance/qr">
+              <QrCode />
+              Check-in station
+            </Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/admin/people?add=true">
+              <Plus />
+              Add member
+            </Link>
+          </Button>
         </div>
       </div>
-
-      {/* -------------------------------------------------------------------- */}
-      {/* 2. THE 4 CORE METRICS */}
-      {/* -------------------------------------------------------------------- */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Metric 1: Total Active Members */}
-        <StatCard
-          title="Active Members"
-          value={stats.customers.total}
-          icon={Users}
-          progress={{
-            value: stats.customers.total,
-            max: stats.customers.max,
-          }}
-          badge={{
-            text:
-              stats.customers.total >= stats.customers.max
-                ? "At Capacity"
-                : `${stats.customers.max - stats.customers.total} spots left`,
-            variant:
-              stats.customers.total >= stats.customers.max
-                ? "destructive"
-                : stats.customers.total >= stats.customers.max * 0.8
-                ? "warning"
-                : "success",
-          }}
-        />
-
-        {/* Metric 2: Today's Attendance */}
-        <StatCard
-          title="Today’s Attendance"
-          value={stats.presentTodayCount}
-          icon={CalendarCheck2}
-          description="Verified GPS check-ins today"
-          badge={{ text: "Live", variant: "success" }}
-        />
-
-        {/* Metric 3: Monthly Revenue */}
-        <StatCard
-          title="Monthly Revenue"
-          value={stats.monthlyRevenue}
-          prefix="₹"
-          formatValue={(n) => n.toLocaleString("en-IN")}
-          icon={CreditCard}
-          description="Total paid receipts this month"
-          badge={{ text: "This Month", variant: "default" }}
-        />
-
-        {/* Metric 4: Attention Needed */}
-        <StatCard
-          title="Attention Needed"
-          value={stats.feesOverdueCount + stats.needsAttention.trialsEndingSoon.length}
-          icon={AlertTriangle}
-          description="Expired passes and ending trials"
-          badge={{
-            text:
-              stats.feesOverdueCount > 0 || stats.needsAttention.trialsEndingSoon.length > 0
-                ? "Action Required"
-                : "All Good",
-            variant:
-              stats.feesOverdueCount > 0 || stats.needsAttention.trialsEndingSoon.length > 0
-                ? "warning"
-                : "success",
-          }}
-        />
+      <div className="grid grid-cols-2 gap-x-6 gap-y-6 rounded-xl border border-border bg-card px-5 py-6 sm:px-7 xl:grid-cols-4">
+        {metrics.map((m, i) => (
+          <div
+            key={m.title}
+            className={i > 0 ? "xl:border-l xl:border-border xl:pl-6" : ""}
+          >
+            <div className="flex items-center justify-between gap-2 text-xs text-dim">
+              <span>{m.title}</span>
+              <m.icon className="size-4" strokeWidth={1.6} />
+            </div>
+            <p className="mt-3 text-[28px] font-semibold tracking-[-.8px] tabular-nums sm:text-[30px]">
+              {m.value}
+            </p>
+            <p
+              className={`mt-2 flex items-center gap-1 text-[11px] ${m.positive ? "text-status-active-fg" : "text-dim"}`}
+            >
+              {m.positive && <ArrowUpRight className="size-3" />}
+              {m.detail}
+            </p>
+          </div>
+        ))}
       </div>
-
-      {/* -------------------------------------------------------------------- */}
-      {/* 3. QUICK RECEPTION ACTIONS */}
-      {/* -------------------------------------------------------------------- */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Link
-          href="/admin/people"
-          className="apple-card flex items-center gap-3 p-3.5 transition-all hover:bg-stone-50/50"
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#f2f6d0] text-[#242424]">
-            <UserPlus className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-xs font-semibold text-[#242424]">Add Member</h2>
-            <p className="text-[11px] text-[#71697a]">Invite customer or trainer</p>
-          </div>
-        </Link>
-
-        <Link
-          href="/admin/payments"
-          className="apple-card flex items-center gap-3 p-3.5 transition-all hover:bg-stone-50/50"
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#d0e1d4] text-[#242424]">
-            <Receipt className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-xs font-semibold text-[#242424]">Record Payment</h2>
-            <p className="text-[11px] text-[#71697a]">Generate sequential receipt</p>
-          </div>
-        </Link>
-
-        <Link
-          href="/admin/attendance/qr"
-          className="apple-card flex items-center gap-3 p-3.5 transition-all hover:bg-stone-50/50"
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#d9d2b6] text-[#242424]">
-            <QrCode className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-xs font-semibold text-[#242424]">Reception QR</h2>
-            <p className="text-[11px] text-[#71697a]">15s dynamic scanner</p>
-          </div>
-        </Link>
-
-        <Link
-          href="/admin/salaries"
-          className="apple-card flex items-center gap-3 p-3.5 transition-all hover:bg-stone-50/50"
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e4be9e] text-[#242424]">
-            <CreditCard className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-xs font-semibold text-[#242424]">Trainer Payroll</h2>
-            <p className="text-[11px] text-[#71697a]">Monthly salary ledger</p>
-          </div>
-        </Link>
+      <div className="grid min-w-0 gap-5 xl:grid-cols-[1.65fr_1fr]">
+        <AttendanceChart data={insights.attendance} />
+        <MembershipChart data={insights.memberships} />
       </div>
-
-      {/* -------------------------------------------------------------------- */}
-      {/* 4. DASHBOARD PANELS: ATTENDANCE OVERVIEW & UPCOMING EXPIRATIONS */}
-      {/* -------------------------------------------------------------------- */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left 2 Cols: Attention Items & Upcoming Expirations */}
-        <div className="lg:col-span-2 apple-card p-6">
-          <div className="flex items-center justify-between border-b border-[rgba(40,40,40,0.06)] pb-4">
+      <div className="grid gap-5 xl:grid-cols-[1.65fr_1fr]">
+        <section className="apple-card overflow-hidden">
+          <div className="flex items-center justify-between gap-3 px-5 py-5 sm:px-6">
             <div>
-              <h2 className="text-base font-semibold text-[#242424]">Needs Attention</h2>
-              <p className="text-xs text-[#71697a]">
-                Expiring memberships, trial visitors, and pending payroll
+              <h2 className="text-[15px] font-semibold">Upcoming renewals</h2>
+              <p className="mt-1 text-xs text-dim">
+                {stats.expiringIn7DaysCount} memberships expire in the next 7
+                days
               </p>
             </div>
-            {hasAlerts && (
-              <span className="rounded-full bg-[#e4be9e]/50 px-2.5 py-0.5 text-[11px] font-semibold text-[#8c5222]">
-                Action Required
-              </span>
-            )}
+            <Link
+              href="/admin/subscriptions"
+              className="flex shrink-0 items-center gap-1 text-xs text-dim hover:text-foreground"
+            >
+              View all <ArrowRight className="size-3" />
+            </Link>
           </div>
-
-          {!hasAlerts ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#d0e1d4]/60 text-emerald-900 mb-3">
-                <CheckCircle2 className="h-5 w-5" />
-              </div>
-              <h4 className="text-sm font-semibold text-[#242424]">All Caught Up</h4>
-              <p className="mt-1 text-xs text-[#71697a] max-w-sm">
-                No trial expirations, overdue memberships, or pending payroll require action.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-5 space-y-4">
-              {/* Trials Ending Soon */}
-              {stats.needsAttention.trialsEndingSoon.length > 0 && (
-                <div className="rounded-xl border border-[rgba(40,40,40,0.06)] bg-[#FAFAF8] p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-semibold text-[#242424]">
-                      Trials Ending Soon ({stats.needsAttention.trialsEndingSoon.length})
-                    </span>
-                    <Link
-                      href="/admin/trials"
-                      className="inline-flex items-center gap-1 text-xs font-medium text-[#71697a] hover:text-[#242424]"
-                    >
-                      <span>View all</span>
-                      <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {stats.needsAttention.trialsEndingSoon.map((t) => (
-                      <div
-                        key={t.id}
-                        className="flex items-center justify-between rounded-lg bg-white p-3 border border-[rgba(40,40,40,0.04)] shadow-sm"
-                      >
-                        <div>
-                          <p className="text-xs font-semibold text-[#242424]">{t.name}</p>
-                          <p className="text-[11px] text-[#71697a]">{t.email}</p>
-                        </div>
-                        <span className="rounded-full bg-[#e4be9e]/50 px-2 py-0.5 text-[10px] font-semibold text-[#8c5222]">
-                          {t.daysLeft <= 0 ? "Ends today" : `${t.daysLeft}d left`}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Expired Memberships */}
-              {stats.needsAttention.overdueMembers.length > 0 && (
-                <div className="rounded-xl border border-[rgba(40,40,40,0.06)] bg-[#FAFAF8] p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-semibold text-[#242424]">
-                      Expired Passes ({stats.needsAttention.overdueMembers.length})
-                    </span>
-                    <Link
-                      href="/admin/subscriptions"
-                      className="inline-flex items-center gap-1 text-xs font-medium text-[#71697a] hover:text-[#242424]"
-                    >
-                      <span>View list</span>
-                      <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {stats.needsAttention.overdueMembers.map((m) => (
-                      <div
-                        key={m.id}
-                        className="flex items-center justify-between rounded-lg bg-white p-3 border border-[rgba(40,40,40,0.04)] shadow-sm"
-                      >
-                        <div>
-                          <p className="text-xs font-semibold text-[#242424]">{m.name}</p>
-                          <p className="text-[11px] text-[#71697a]">{m.email}</p>
-                        </div>
-                        <Link
-                          href="/admin/payments"
-                          className="apple-button-press rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-800 hover:bg-rose-100"
-                        >
-                          Renew
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Pending Salaries */}
-              {stats.needsAttention.pendingSalaries.count > 0 && (
-                <div className="flex items-center justify-between rounded-xl border border-[rgba(40,40,40,0.06)] bg-white p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-100 text-[#242424]">
-                      <CreditCard className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-[#242424]">
-                        Payroll Pending ({stats.needsAttention.pendingSalaries.count} trainers)
-                      </p>
-                      <p className="text-[11px] text-[#71697a] tabular-nums font-mono">
-                        ₹{stats.needsAttention.pendingSalaries.totalAmount.toLocaleString("en-IN")}{" "}
-                        due this month
-                      </p>
-                    </div>
-                  </div>
-
+          {insights.expirations.length ? (
+            insights.expirations.map((m, i) => (
+              <div
+                key={m.id}
+                className="flex items-center gap-3 border-t border-border/70 px-5 py-4 sm:px-6"
+              >
+                <span
+                  className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-medium ${i % 2 ? "bg-desert/35" : "bg-honeydew/50"}`}
+                >
+                  {m.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join("")}
+                </span>
+                <div className="min-w-0 flex-1">
                   <Link
-                    href="/admin/salaries"
-                    className="apple-button-press inline-flex items-center gap-1 rounded-full border border-[rgba(40,40,40,0.08)] bg-stone-50 px-3 py-1.5 text-xs font-medium text-[#242424] hover:bg-stone-100"
+                    href={`/admin/people/${m.id}`}
+                    className="truncate text-sm font-medium hover:underline"
                   >
-                    <span>Disburse</span>
-                    <ArrowRight className="h-3 w-3" />
+                    {m.name}
                   </Link>
+                  <p className="mt-0.5 text-xs text-dim">{m.plan}</p>
                 </div>
-              )}
+                <span className="hidden text-xs text-dim sm:block">
+                  {new Date(m.date).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </span>
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/admin/subscriptions?renew=${m.id}`}>Renew</Link>
+                </Button>
+              </div>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center border-t border-border py-12">
+              <span className="mb-3 flex size-9 items-center justify-center rounded-full bg-honeydew/50">
+                <Check className="size-4 text-status-active-fg" />
+              </span>
+              <p className="text-sm font-medium">You’re all caught up.</p>
+              <p className="mt-1 text-xs text-dim">
+                No memberships are expiring this week.
+              </p>
             </div>
           )}
-        </div>
-
-        {/* Right Col: Facility Capacity & Operations Status */}
-        <div className="space-y-6">
-          {/* Facility Status Card */}
-          <div className="apple-card p-6">
-            <h2 className="text-sm font-semibold text-[#242424]">Facility Status</h2>
-            <div className="mt-4 space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[#71697a]">Active Trainers</span>
-                <span className="font-semibold text-[#242424]">{stats.trainersCount}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[#71697a]">Expiring in 7 Days</span>
-                <span className="font-semibold text-[#242424]">{stats.expiringIn7DaysCount}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[#71697a]">Capacity Limit</span>
-                <span className="font-semibold text-[#242424]">{stats.customers.max} members</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[#71697a]">Geofence Radius</span>
-                <span className="font-semibold text-emerald-800 bg-[#d0e1d4]/40 px-2 py-0.5 rounded-full text-[11px]">
-                  Locked & Active
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-5 border-t border-[rgba(40,40,40,0.06)] pt-4">
-              <Link
-                href="/admin/attendance"
-                className="flex items-center justify-between text-xs font-medium text-[#242424] hover:underline"
-              >
-                <span>View Attendance Logs</span>
-                <ArrowRight className="h-3.5 w-3.5 text-[#71697a]" />
-              </Link>
-            </div>
+        </section>
+        <section className="apple-card p-5 sm:p-6">
+          <h2 className="text-[15px] font-semibold">Recent activity</h2>
+          <p className="mt-1 text-xs text-dim">The latest from your gym</p>
+          <div className="mt-5 space-y-5">
+            {insights.activity.length ? (
+              insights.activity.map((a) => {
+                const Icon =
+                  a.type === "payment"
+                    ? Receipt
+                    : a.type === "member"
+                      ? UserRoundPlus
+                      : CalendarCheck2;
+                return (
+                  <div
+                    key={`${a.type}-${a.id}`}
+                    className="flex items-start gap-3"
+                  >
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-honeydew/35">
+                      <Icon className="size-3.5 text-status-active-fg" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium">{a.name}</p>
+                      <p className="mt-0.5 text-[11px] text-dim">{a.detail}</p>
+                      <p className="mt-1 text-[10px] text-dim/75">
+                        {formatDistanceToNow(new Date(a.time), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="py-8 text-xs leading-relaxed text-dim">
+                Your gym’s activity will appear here as members join, check in,
+                and make payments.
+              </p>
+            )}
           </div>
-        </div>
+        </section>
+      </div>
+      <div className="grid gap-5 xl:grid-cols-[1.65fr_1fr]">
+        <RevenueChart data={insights.revenue} />
+        <section className="apple-card p-5 sm:p-6">
+          <h2 className="text-[15px] font-semibold">
+            A little attention goes a long way.
+          </h2>
+          <p className="mt-1 text-xs text-dim">
+            Keep the everyday running smoothly.
+          </p>
+          <div className="mt-5 divide-y divide-border">
+            {[
+              {
+                title: "Expired memberships",
+                count: stats.feesOverdueCount,
+                href: "/admin/subscriptions",
+                text: "Help members get back into their routine.",
+              },
+              {
+                title: "Trials ending soon",
+                count: stats.needsAttention.trialsEndingSoon.length,
+                href: "/admin/trials",
+                text: "Turn a great first impression into a membership.",
+              },
+              {
+                title: "Pending payroll",
+                count: stats.needsAttention.pendingSalaries.count,
+                href: "/admin/salaries",
+                text: "Keep your coaching team taken care of.",
+              },
+            ].map((x) => (
+              <Link
+                key={x.title}
+                href={x.href}
+                className="flex items-center gap-3 py-4 first:pt-0"
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-desert/25 text-xs font-medium tabular-nums">
+                  {x.count}
+                </span>
+                <div className="flex-1">
+                  <p className="text-xs font-medium">{x.title}</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-dim">
+                    {x.text}
+                  </p>
+                </div>
+                <ArrowRight className="size-3 text-dim" />
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

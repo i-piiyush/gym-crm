@@ -1,4 +1,5 @@
 import { getPortalSession } from "@/lib/session";
+import { getDashboardInsights } from "@/services/insights.service";
 import { getAdminDashboardStats } from "@/services/dashboard.service";
 import { DashboardOverview } from "@/features/dashboard/components/DashboardOverview";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -12,10 +13,13 @@ export default async function AdminOverviewPage() {
   const gymName = session.gymName || "Gym";
   const timezone = session.timezone || "Asia/Kolkata";
 
-  const stats = await getAdminDashboardStats(gymId, {
-    timezone,
-    maxCustomers: session.maxCustomers || 100,
-  });
+  const [stats, insights] = await Promise.all([
+    getAdminDashboardStats(gymId, {
+      timezone,
+      maxCustomers: session.maxCustomers || 100,
+    }),
+    getDashboardInsights(gymId, timezone),
+  ]);
 
   // Compute Apple-style greeting based on local time
   const now = new Date();
@@ -25,8 +29,8 @@ export default async function AdminOverviewPage() {
     localHour < 12
       ? "Good morning."
       : localHour < 17
-      ? "Good afternoon."
-      : "Good evening.";
+        ? "Good afternoon."
+        : "Good evening.";
 
   const dateStr = formatInTimeZone(now, timezone, "EEEE, MMMM d, yyyy");
 
@@ -34,6 +38,7 @@ export default async function AdminOverviewPage() {
     <FadeIn>
       <DashboardOverview
         stats={stats}
+        insights={insights}
         gymName={gymName}
         greeting={greeting}
         dateStr={dateStr}

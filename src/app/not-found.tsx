@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { LuSearch, LuHouse } from "react-icons/lu";
+import { Search as LuSearch, House as LuHouse } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-6 text-center dark:bg-slate-950">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mb-6 shadow-sm">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-muted p-6 text-center dark:bg-slate-950">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-status-warning-bg0/10 text-amber-600 dark:text-amber-400 mb-6 shadow-sm">
         <LuSearch className="h-7 w-7" />
       </div>
 
@@ -28,4 +28,3 @@ export default function NotFound() {
     </div>
   );
 }
-

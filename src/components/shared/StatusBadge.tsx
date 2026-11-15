@@ -15,33 +15,36 @@ export function StatusBadge({ status, className, label }: StatusBadgeProps) {
       case "PAID":
       case "SENT":
       case "VERIFIED":
-        return "bg-[#d0e1d4]/50 text-emerald-900 border-[rgba(40,40,40,0.06)]";
+        return "bg-honeydew/50 text-status-active-fg border-border";
       case "TRIAL":
       case "PENDING":
       case "EXPIRING":
       case "INVITED":
       case "PENDING_OWNER":
-        return "bg-[#e4be9e]/45 text-[#8c5222] border-[rgba(40,40,40,0.06)]";
+        return "bg-desert/45 text-status-warning-fg border-border";
       case "EXPIRED":
       case "FAILED":
       case "CANCELLED":
-        return "bg-rose-50 text-rose-800 border-rose-200/80";
+        return "bg-status-danger-bg text-status-danger-fg border-rose-200/80";
       case "INACTIVE":
       case "SUSPENDED":
       case "REVOKED":
       default:
-        return "bg-[#d9d2b6]/35 text-[#71697a] border-[rgba(40,40,40,0.06)]";
+        return "bg-sand/35 text-muted-foreground border-border";
     }
   };
 
-  const displayLabel = label || normalized.replace("_", " ");
+  const displayLabel =
+    label ||
+    normalized.charAt(0) +
+      normalized.slice(1).toLowerCase().replaceAll("_", " ");
 
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-tight transition-colors",
         getStyle(),
-        className
+        className,
       )}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-current opacity-75" />

@@ -14,11 +14,17 @@ export default async function AdminLayout({
   const session = await getPortalSession("ADMIN");
 
   return (
-    <div className="flex min-h-screen bg-[#FAFAF8]">
+    <div className="flex min-h-screen bg-background">
       <Sidebar role="ADMIN" gymName={session.gymName} userName={session.name} />
-      <div className="flex flex-1 flex-col pb-16 lg:pb-0">
-        <Topbar role="ADMIN" gymName={session.gymName} userName={session.name} />
-        <main className="flex-1 p-4 lg:p-8 max-w-7xl mx-auto w-full">{children}</main>
+      <div className="flex min-w-0 flex-1 flex-col pb-16 lg:pb-0">
+        <Topbar
+          role="ADMIN"
+          gymName={session.gymName}
+          userName={session.name}
+        />
+        <main className="portal-main mx-auto w-full max-w-[1440px] min-w-0 flex-1 px-4 py-7 sm:px-7 lg:px-9 lg:py-9">
+          {children}
+        </main>
         <BottomNav role="ADMIN" />
       </div>
     </div>

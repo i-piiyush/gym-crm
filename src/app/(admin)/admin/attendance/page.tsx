@@ -5,7 +5,7 @@ import { getPortalSession } from "@/lib/session";
 import * as attendanceRepo from "@/db/repositories/attendance.repo";
 import { formatInTimeZone } from "date-fns-tz";
 import Link from "next/link";
-import { LuQrCode } from "react-icons/lu";
+import { QrCode as LuQrCode } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 
 export const dynamic = "force-dynamic";
@@ -24,12 +24,12 @@ export default async function AdminAttendancePage() {
   return (
     <FadeIn className="space-y-6">
       <PageHeader
-        title="Attendance & Geofence Logs"
-        description="Monitor live member and trainer check-ins, verify physical distance from gym geofence, and inspect monthly attendance."
+        title="Attendance"
+        description="See who’s showing up and keep your community moving."
         action={
           <Link
             href={ROUTES.ADMIN.ATTENDANCE_QR}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-emerald-700 shadow-sm transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/85 shadow-sm transition-colors"
           >
             <LuQrCode className="h-4 w-4" />
             <span>Launch Attendance QR</span>
@@ -46,4 +46,3 @@ export default async function AdminAttendancePage() {
     </FadeIn>
   );
 }
-

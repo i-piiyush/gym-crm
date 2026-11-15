@@ -15,12 +15,11 @@ export default async function AdminSubscriptionsPage() {
   return (
     <FadeIn className="space-y-6">
       <PageHeader
-        title="Subscription Renewals & Expiries"
-        description="Track member pass expiration timelines (7, 15, 30 days) and renew memberships instantly."
+        title="Memberships"
+        description="Keep every plan, expiration, and renewal in perfect sync."
       />
 
       <SubscriptionsView buckets={buckets} plans={plans} />
     </FadeIn>
   );
 }
-

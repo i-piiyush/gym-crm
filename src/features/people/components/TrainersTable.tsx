@@ -1,4 +1,13 @@
 "use client";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 import { useState } from "react";
 import { TrainerListItem, TrainerOption } from "@/types/person.types";
@@ -13,24 +22,27 @@ interface TrainersTableProps {
   allTrainers: TrainerOption[];
 }
 
-export function TrainersTable({ trainers: initialTrainers, allTrainers }: TrainersTableProps) {
+export function TrainersTable({
+  trainers: initialTrainers,
+  allTrainers,
+}: TrainersTableProps) {
   const [trainers, setTrainers] = useState<TrainerListItem[]>(initialTrainers);
-  const [selectedTrainer, setSelectedTrainer] = useState<TrainerListItem | null>(null);
+  const [selectedTrainer, setSelectedTrainer] =
+    useState<TrainerListItem | null>(null);
   const [reassignedTrainerId, setReassignedTrainerId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const availableReplacementTrainers = allTrainers.filter(
-    (t) => t.id !== selectedTrainer?.id
+    (t) => t.id !== selectedTrainer?.id,
   );
 
   const handleRemove = async () => {
     if (!selectedTrainer) return;
 
-    if (
-      selectedTrainer.assignedCustomersCount > 0 &&
-      !reassignedTrainerId
-    ) {
-      toast.error("Please choose a replacement trainer for the assigned customers.");
+    if (selectedTrainer.assignedCustomersCount > 0 && !reassignedTrainerId) {
+      toast.error(
+        "Please choose a replacement trainer for the assigned customers.",
+      );
       return;
     }
 
@@ -59,24 +71,28 @@ export function TrainersTable({ trainers: initialTrainers, allTrainers }: Traine
   return (
     <div className="apple-card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead className="border-b border-[rgba(40,40,40,0.06)] bg-[#FAFAF8] text-[11px] font-medium text-[#71697a]">
-            <tr>
-              <th className="px-5 py-3.5">Trainer Staff</th>
-              <th className="px-5 py-3.5">Contact</th>
-              <th className="px-5 py-3.5">Compensation</th>
-              <th className="px-5 py-3.5">Assigned Clients</th>
-              <th className="px-5 py-3.5">Status</th>
-              <th className="px-5 py-3.5 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[rgba(40,40,40,0.05)]">
+        <Table className="w-full text-left text-xs">
+          <TableHeader className="border-b border-border bg-background text-[11px] font-medium text-muted-foreground">
+            <TableRow>
+              <TableHead className="px-5 py-3.5">Trainer Staff</TableHead>
+              <TableHead className="px-5 py-3.5">Contact</TableHead>
+              <TableHead className="px-5 py-3.5">Compensation</TableHead>
+              <TableHead className="px-5 py-3.5">Assigned Clients</TableHead>
+              <TableHead className="px-5 py-3.5">Status</TableHead>
+              <TableHead className="px-5 py-3.5 text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-[rgba(40,40,40,0.05)]">
             {trainers.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-[#71697a]">
-                  No trainers enrolled yet. Click &quot;Add Member or Staff&quot; to invite a coach.
-                </td>
-              </tr>
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="px-6 py-12 text-center text-muted-foreground"
+                >
+                  No trainers enrolled yet. Click &quot;Add Member or
+                  Staff&quot; to invite a coach.
+                </TableCell>
+              </TableRow>
             ) : (
               trainers.map((trainer) => {
                 const initials = trainer.name
@@ -89,63 +105,72 @@ export function TrainersTable({ trainers: initialTrainers, allTrainers }: Traine
                   : "T";
 
                 return (
-                  <tr
+                  <TableRow
                     key={trainer.id}
-                    className="hover:bg-stone-50/50 transition-colors"
+                    className="hover:bg-muted/50 transition-colors"
                   >
-                    <td className="px-5 py-3.5">
+                    <TableCell className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#d0e1d4]/60 text-xs font-semibold text-[#242424]">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-honeydew/60 text-xs font-semibold text-foreground">
                           {initials}
                         </div>
                         <div>
-                          <p className="font-semibold text-[#242424]">{trainer.name}</p>
-                          <p className="text-[11px] text-[#71697a]">{trainer.email}</p>
+                          <p className="font-semibold text-foreground">
+                            {trainer.name}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {trainer.email}
+                          </p>
                         </div>
                       </div>
-                    </td>
+                    </TableCell>
 
-                    <td className="px-5 py-3.5 text-xs font-mono text-[#71697a]">
+                    <TableCell className="px-5 py-3.5 text-xs font-mono text-muted-foreground">
                       {trainer.phone || "—"}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-5 py-3.5">
-                      <div className="font-semibold text-xs text-[#242424] font-mono tabular-nums">
+                    <TableCell className="px-5 py-3.5">
+                      <div className="font-semibold text-xs text-foreground font-mono tabular-nums">
                         ₹{trainer.monthlySalary.toLocaleString("en-IN")} / mo
                       </div>
-                      <div className="text-[11px] text-[#71697a]">
+                      <div className="text-[11px] text-muted-foreground">
                         Due day {trainer.salaryDueDay} of month
                       </div>
-                    </td>
+                    </TableCell>
 
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-1.5 text-xs text-[#242424]">
-                        <Users className="h-3.5 w-3.5 text-[#71697a]" />
-                        <span className="font-semibold">{trainer.assignedCustomersCount}</span>
-                        <span className="text-[#71697a]">members</span>
+                    <TableCell className="px-5 py-3.5">
+                      <div className="flex items-center gap-1.5 text-xs text-foreground">
+                        <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="font-semibold">
+                          {trainer.assignedCustomersCount}
+                        </span>
+                        <span className="text-muted-foreground">members</span>
                       </div>
-                    </td>
+                    </TableCell>
 
-                    <td className="px-5 py-3.5">
+                    <TableCell className="px-5 py-3.5">
                       <StatusBadge status={trainer.status} />
-                    </td>
+                    </TableCell>
 
-                    <td className="px-5 py-3.5 text-right">
-                      <button
+                    <TableCell className="px-5 py-3.5 text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         type="button"
                         onClick={() => setSelectedTrainer(trainer)}
-                        className="apple-button-press inline-flex h-7 w-7 items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50"
+                        className="apple-button-press inline-flex h-7 w-7 items-center justify-center rounded-lg text-status-danger-fg hover:bg-status-danger-bg"
                         title="Remove Trainer"
+                        aria-label={`Remove ${trainer.name}`}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Remove Trainer Confirmation Dialog */}
@@ -169,18 +194,19 @@ export function TrainersTable({ trainers: initialTrainers, allTrainers }: Traine
         >
           {selectedTrainer.assignedCustomersCount > 0 && (
             <div className="mt-4">
-              <label className="block text-xs font-medium text-[#242424] mb-1.5">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Transfer {selectedTrainer.assignedCustomersCount} Clients To:
               </label>
               {availableReplacementTrainers.length === 0 ? (
-                <p className="text-xs text-rose-600 font-medium">
-                  No other active trainers available. Please add another trainer first before removing this coach.
+                <p className="text-xs text-status-danger-fg font-medium">
+                  No other active trainers available. Please add another trainer
+                  first before removing this coach.
                 </p>
               ) : (
                 <select
                   value={reassignedTrainerId}
                   onChange={(e) => setReassignedTrainerId(e.target.value)}
-                  className="w-full rounded-xl border border-[rgba(40,40,40,0.1)] bg-white px-3 py-2 text-xs text-[#242424] focus:border-[#242424] focus:outline-none"
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs text-foreground focus:border-ring focus:outline-none"
                 >
                   <option value="">Select replacement trainer...</option>
                   {availableReplacementTrainers.map((t) => (

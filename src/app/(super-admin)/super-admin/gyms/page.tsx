@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { GymsTable } from "@/features/super-admin/components/GymsTable";
 import { getAllGyms } from "@/services/gym.service";
-import { LuPlus } from "react-icons/lu";
+import { Plus as LuPlus } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 
@@ -19,7 +19,7 @@ export default async function GymsListPage() {
         action={
           <Link
             href={ROUTES.SUPER_ADMIN.GYM_NEW}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-emerald-700 shadow-sm transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/85 shadow-sm transition-colors"
           >
             <LuPlus className="h-4 w-4" />
             <span>Create New Gym</span>
@@ -31,4 +31,3 @@ export default async function GymsListPage() {
     </FadeIn>
   );
 }
-

@@ -1,16 +1,24 @@
 "use client";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 import { useState } from "react";
 import { format } from "date-fns";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import {
-  LuSearch,
-  LuCalendarCheck,
-  LuClock,
-  LuUser,
-  LuPhone,
-  LuMail,
-} from "react-icons/lu";
+  Search as LuSearch,
+  CalendarCheck as LuCalendarCheck,
+  Clock as LuClock,
+  User as LuUser,
+  Phone as LuPhone,
+  Mail as LuMail,
+} from "lucide-react";
 
 interface ClientItem {
   id: string;
@@ -58,15 +66,16 @@ export function TrainerClientsTable({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-foreground">
+              <h2 className="text-base font-semibold text-foreground">
                 My Coaching Clients
               </h2>
-              <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:border-emerald-800/40 dark:bg-emerald-950/40 dark:text-emerald-300">
+              <span className="inline-flex items-center rounded-full border border-emerald-200 bg-status-active-bg px-2.5 py-0.5 text-xs font-semibold text-status-active-fg   ">
                 {checkedInCount} of {clients.length} present today
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Customers assigned exclusively to you for training, workout guidance, and attendance follow-ups.
+              Customers assigned exclusively to you for training, workout
+              guidance, and attendance follow-ups.
             </p>
           </div>
         </div>
@@ -92,23 +101,30 @@ export function TrainerClientsTable({
       {/* Clients Table */}
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
-              <tr>
-                <th className="px-6 py-4">Client</th>
-                <th className="px-6 py-4">Today&apos;s Attendance ({todayDateStr})</th>
-                <th className="px-6 py-4">Membership Plan</th>
-                <th className="px-6 py-4">Validity</th>
-                <th className="px-6 py-4 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+          <Table className="w-full text-left text-sm">
+            <TableHeader className="border-b border-border bg-muted/40 text-xs font-semibold tracking-wide text-muted-foreground ">
+              <TableRow>
+                <TableHead className="px-6 py-4">Client</TableHead>
+                <TableHead className="px-6 py-4">
+                  Today&apos;s Attendance ({todayDateStr})
+                </TableHead>
+                <TableHead className="px-6 py-4">Membership Plan</TableHead>
+                <TableHead className="px-6 py-4">Validity</TableHead>
+                <TableHead className="px-6 py-4 text-right">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-border">
               {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-xs">
-                    {search ? "No clients match your search query." : "No clients assigned yet."}
-                  </td>
-                </tr>
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="px-6 py-12 text-center text-muted-foreground text-xs"
+                  >
+                    {search
+                      ? "No clients match your search query."
+                      : "No clients assigned yet."}
+                  </TableCell>
+                </TableRow>
               ) : (
                 filtered.map((c) => {
                   let validityText = "—";
@@ -119,12 +135,14 @@ export function TrainerClientsTable({
                   }
 
                   return (
-                    <tr
+                    <TableRow
                       key={c.id}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors"
+                      className="hover:bg-muted/30  transition-colors"
                     >
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-foreground">{c.name}</div>
+                      <TableCell className="px-6 py-4">
+                        <div className="font-semibold text-foreground">
+                          {c.name}
+                        </div>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                           <LuMail className="h-3 w-3 shrink-0" />
                           <span>{c.email}</span>
@@ -135,44 +153,47 @@ export function TrainerClientsTable({
                             <span>{c.phone}</span>
                           </div>
                         )}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4">
+                      <TableCell className="px-6 py-4">
                         {c.checkedInToday ? (
-                          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40">
-                            <LuCalendarCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                          <div className="inline-flex items-center gap-1.5 rounded-full bg-status-active-bg border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold text-status-active-fg   ">
+                            <LuCalendarCheck className="h-3.5 w-3.5 text-emerald-600 " />
                             <span>
-                              Present ({c.checkInTime ? format(new Date(c.checkInTime), "hh:mm a") : "Logged"})
+                              Present (
+                              {c.checkInTime
+                                ? format(new Date(c.checkInTime), "hh:mm a")
+                                : "Logged"}
+                              )
                             </span>
                           </div>
                         ) : (
-                          <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
-                            <LuClock className="h-3.5 w-3.5 text-slate-500" />
+                          <div className="inline-flex items-center gap-1.5 rounded-full bg-muted border border-border px-2.5 py-0.5 text-xs font-medium text-dim   ">
+                            <LuClock className="h-3.5 w-3.5 text-dim" />
                             <span>Not Checked In</span>
                           </div>
                         )}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4 font-medium text-xs text-foreground">
+                      <TableCell className="px-6 py-4 font-medium text-xs text-foreground">
                         {c.planName}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4 text-xs text-muted-foreground">
+                      <TableCell className="px-6 py-4 text-xs text-muted-foreground">
                         {validityText}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4 text-right">
+                      <TableCell className="px-6 py-4 text-right">
                         <StatusBadge status={c.status} label={c.status} />
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
   );
 }
-

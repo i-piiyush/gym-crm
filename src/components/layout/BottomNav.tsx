@@ -16,7 +16,7 @@ export function BottomNav({ role }: BottomNavProps) {
   const navItems = (ROLE_NAVIGATION[role] || []).slice(0, 4);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-[rgba(40,40,40,0.08)] bg-[#FAFAF8]/90 px-3 backdrop-blur-xl lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-border bg-background/90 px-3 backdrop-blur-xl lg:hidden">
       {navItems.map((item) => {
         const isActive =
           pathname === item.href ||
@@ -34,19 +34,19 @@ export function BottomNav({ role }: BottomNavProps) {
             className={cn(
               "apple-button-press relative flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-medium transition-colors",
               isActive
-                ? "font-semibold text-[#242424]"
-                : "text-[#71697a] hover:text-[#242424]"
+                ? "font-semibold text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             <Icon
               className={cn(
                 "h-4 w-4 transition-transform",
-                isActive ? "scale-105 text-[#242424]" : "text-[#71697a]"
+                isActive ? "scale-105 text-foreground" : "text-muted-foreground"
               )}
             />
             <span className="truncate">{item.title}</span>
             {isActive && (
-              <span className="absolute -bottom-1 h-1 w-1 rounded-full bg-[#242424]" />
+              <span className="absolute -bottom-1 h-1 w-1 rounded-full bg-primary" />
             )}
           </Link>
         );
