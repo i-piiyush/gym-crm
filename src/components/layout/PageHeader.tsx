@@ -4,23 +4,26 @@ interface PageHeaderProps {
   title: string;
   description?: string;
   action?: ReactNode;
+  badge?: ReactNode;
 }
 
-export function PageHeader({ title, description, action }: PageHeaderProps) {
+export function PageHeader({ title, description, action, badge }: PageHeaderProps) {
   return (
-    <div className="flex flex-col gap-1 pb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-2 pb-6 sm:flex-row sm:items-end sm:justify-between border-b border-[rgba(40,40,40,0.06)]">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {title}
-        </h1>
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl font-semibold tracking-tight text-[#242424] sm:text-3xl">
+            {title}
+          </h1>
+          {badge}
+        </div>
         {description && (
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-xs sm:text-sm text-[#71697a] max-w-2xl leading-relaxed">
             {description}
           </p>
         )}
       </div>
-      {action && <div className="mt-4 sm:mt-0 flex items-center gap-2">{action}</div>}
+      {action && <div className="mt-3 flex items-center gap-2.5 sm:mt-0">{action}</div>}
     </div>
   );
 }
-

@@ -18,10 +18,8 @@ export default async function AdminAttendancePage() {
   const todayStr = formatInTimeZone(new Date(), timezone, "yyyy-MM-dd");
   const currentMonth = formatInTimeZone(new Date(), timezone, "yyyy-MM");
 
-  const [initialRecords, monthlySummaries] = await Promise.all([
-    attendanceRepo.getLiveAttendanceRecords(gymId, todayStr),
-    attendanceRepo.getMonthlySummary(gymId, currentMonth),
-  ]);
+  const { initialRecords, monthlySummaries } =
+    await attendanceRepo.getAttendancePageData(gymId, todayStr, currentMonth);
 
   return (
     <FadeIn className="space-y-6">

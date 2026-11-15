@@ -11,6 +11,10 @@ export async function getGymDetails(id: string): Promise<GymDetailsView | null> 
   return gymRepo.getGymById(id);
 }
 
+export async function getGymSettingsData(id: string) {
+  return gymRepo.getGymSettingsData(id);
+}
+
 export async function createNewGym(input: CreateGymInput) {
   const normalizedOwnerEmail = input.ownerEmail.toLowerCase().trim();
 

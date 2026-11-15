@@ -1,124 +1,161 @@
-import { IconType } from "react-icons";
 import {
-  LuLayoutDashboard,
-  LuBuilding2,
-  LuUsers,
-  LuCreditCard,
-  LuBanknote,
-  LuCalendarCheck,
-  LuQrCode,
-  LuSettings,
-  LuHourglass,
-  LuClock,
-} from "react-icons/lu";
+  LayoutDashboard,
+  Building2,
+  Users,
+  CreditCard,
+  Banknote,
+  CalendarCheck2,
+  QrCode,
+  Settings,
+  Hourglass,
+  Clock,
+  LucideIcon,
+  HelpCircle,
+} from "lucide-react";
 import { UserRoleType } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
 
 export interface NavItem {
   title: string;
   href: string;
-  icon: IconType;
+  icon: LucideIcon;
   badge?: string;
+  section?: "OVERVIEW" | "MANAGEMENT" | "OPERATIONS" | "SYSTEM";
 }
+
+export interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+export const ADMIN_NAV_SECTIONS: NavSection[] = [
+  {
+    title: "OVERVIEW",
+    items: [
+      {
+        title: "Dashboard",
+        href: ROUTES.ADMIN.DASHBOARD,
+        icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
+    title: "MANAGEMENT",
+    items: [
+      {
+        title: "Members",
+        href: ROUTES.ADMIN.PEOPLE,
+        icon: Users,
+      },
+      {
+        title: "Leads & Trials",
+        href: ROUTES.ADMIN.TRIALS,
+        icon: Hourglass,
+      },
+      {
+        title: "Attendance",
+        href: ROUTES.ADMIN.ATTENDANCE,
+        icon: CalendarCheck2,
+      },
+      {
+        title: "Subscriptions",
+        href: ROUTES.ADMIN.SUBSCRIPTIONS,
+        icon: Clock,
+      },
+      {
+        title: "Payments",
+        href: ROUTES.ADMIN.PAYMENTS,
+        icon: CreditCard,
+      },
+    ],
+  },
+  {
+    title: "OPERATIONS",
+    items: [
+      {
+        title: "Attendance QR",
+        href: ROUTES.ADMIN.ATTENDANCE_QR,
+        icon: QrCode,
+      },
+      {
+        title: "Trainer Payroll",
+        href: ROUTES.ADMIN.SALARIES,
+        icon: Banknote,
+      },
+    ],
+  },
+  {
+    title: "SYSTEM",
+    items: [
+      {
+        title: "Settings",
+        href: ROUTES.ADMIN.SETTINGS,
+        icon: Settings,
+      },
+    ],
+  },
+];
 
 export const ROLE_NAVIGATION: Record<UserRoleType, NavItem[]> = {
   SUPER_ADMIN: [
     {
       title: "Overview",
       href: ROUTES.SUPER_ADMIN.DASHBOARD,
-      icon: LuLayoutDashboard,
+      icon: LayoutDashboard,
+      section: "OVERVIEW",
     },
     {
       title: "Gyms",
       href: ROUTES.SUPER_ADMIN.GYMS,
-      icon: LuBuilding2,
+      icon: Building2,
+      section: "MANAGEMENT",
     },
   ],
-  ADMIN: [
-    {
-      title: "Overview",
-      href: ROUTES.ADMIN.DASHBOARD,
-      icon: LuLayoutDashboard,
-    },
-    {
-      title: "People",
-      href: ROUTES.ADMIN.PEOPLE,
-      icon: LuUsers,
-    },
-    {
-      title: "Payments",
-      href: ROUTES.ADMIN.PAYMENTS,
-      icon: LuCreditCard,
-    },
-    {
-      title: "Salaries",
-      href: ROUTES.ADMIN.SALARIES,
-      icon: LuBanknote,
-    },
-    {
-      title: "Trials",
-      href: ROUTES.ADMIN.TRIALS,
-      icon: LuHourglass,
-    },
-    {
-      title: "Subscriptions",
-      href: ROUTES.ADMIN.SUBSCRIPTIONS,
-      icon: LuClock,
-    },
-    {
-      title: "Attendance",
-      href: ROUTES.ADMIN.ATTENDANCE,
-      icon: LuCalendarCheck,
-    },
-    {
-      title: "Attendance QR",
-      href: ROUTES.ADMIN.ATTENDANCE_QR,
-      icon: LuQrCode,
-    },
-    {
-      title: "Settings",
-      href: ROUTES.ADMIN.SETTINGS,
-      icon: LuSettings,
-    },
-  ],
+  ADMIN: ADMIN_NAV_SECTIONS.flatMap((s) => s.items),
   TRAINER: [
     {
       title: "Overview",
       href: ROUTES.TRAINER.DASHBOARD,
-      icon: LuLayoutDashboard,
+      icon: LayoutDashboard,
+      section: "OVERVIEW",
     },
     {
       title: "My Customers",
       href: ROUTES.TRAINER.CUSTOMERS,
-      icon: LuUsers,
+      icon: Users,
+      section: "MANAGEMENT",
     },
     {
       title: "Attendance",
       href: ROUTES.TRAINER.ATTENDANCE,
-      icon: LuCalendarCheck,
+      icon: CalendarCheck2,
+      section: "OPERATIONS",
     },
     {
       title: "Salary History",
       href: ROUTES.TRAINER.SALARY,
-      icon: LuBanknote,
+      icon: Banknote,
+      section: "OPERATIONS",
     },
   ],
   CUSTOMER: [
     {
       title: "Overview",
       href: ROUTES.CUSTOMER.DASHBOARD,
-      icon: LuLayoutDashboard,
+      icon: LayoutDashboard,
+      section: "OVERVIEW",
     },
     {
-      title: "Attendance",
+      title: "My Attendance",
       href: ROUTES.CUSTOMER.ATTENDANCE,
-      icon: LuCalendarCheck,
+      icon: CalendarCheck2,
+      section: "OPERATIONS",
     },
     {
-      title: "Payments & Receipts",
+      title: "Payments",
       href: ROUTES.CUSTOMER.PAYMENTS,
-      icon: LuCreditCard,
+      icon: CreditCard,
+      section: "OPERATIONS",
     },
   ],
 };
-

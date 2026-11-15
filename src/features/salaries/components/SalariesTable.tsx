@@ -7,14 +7,14 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  LuCreditCard,
-  LuCalendar,
-  LuCheck,
-  LuLoader,
-  LuSearch,
-  LuTrendingUp,
-  LuClock,
-} from "react-icons/lu";
+  CreditCard,
+  Calendar,
+  Check,
+  Loader2,
+  Search,
+  TrendingUp,
+  Clock,
+} from "lucide-react";
 import { format } from "date-fns";
 
 interface SalariesTableProps {
@@ -75,172 +75,182 @@ export function SalariesTable({
 
   return (
     <div className="space-y-6">
-      {/* Metrics Banner */}
+      {/* -------------------------------------------------------------------- */}
+      {/* 3 PAYROLL METRIC CARDS */}
+      {/* -------------------------------------------------------------------- */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        {/* Total Payroll */}
+        <div className="apple-card p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">
+            <span className="text-xs font-medium text-[#71697a]">
               Total Payroll ({overview.month})
             </span>
-            <LuCreditCard className="h-4 w-4 text-muted-foreground" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-[#242424]">
+              <CreditCard className="h-3.5 w-3.5" />
+            </div>
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-foreground">
+          <p className="mt-2 text-2xl font-semibold font-mono text-[#242424] tabular-nums">
             ₹{overview.totalSalaries.toLocaleString("en-IN")}
           </p>
-          <span className="text-[11px] text-muted-foreground">
-            {overview.records.length} trainers on roster
+          <span className="text-[11px] text-[#71697a]">
+            {overview.records.length} trainers on coaching roster
           </span>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        {/* Paid Disbursed */}
+        <div className="apple-card p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">
+            <span className="text-xs font-medium text-[#71697a]">
               Paid Disbursed
             </span>
-            <LuTrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d0e1d4]/60 text-emerald-900">
+              <TrendingUp className="h-3.5 w-3.5" />
+            </div>
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+          <p className="mt-2 text-2xl font-semibold font-mono text-[#242424] tabular-nums">
             ₹{overview.totalPaid.toLocaleString("en-IN")}
           </p>
-          <span className="text-[11px] text-muted-foreground">
-            {overview.records.filter((r) => r.status === "PAID").length} disbursed
+          <span className="text-[11px] text-emerald-800 font-medium">
+            Disbursed and recorded
           </span>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        {/* Pending Disbursement */}
+        <div className="apple-card p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">
+            <span className="text-xs font-medium text-[#71697a]">
               Pending Disbursement
             </span>
-            <LuClock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#e4be9e]/50 text-[#8c5222]">
+              <Clock className="h-3.5 w-3.5" />
+            </div>
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">
+          <p className="mt-2 text-2xl font-semibold font-mono text-[#242424] tabular-nums">
             ₹{overview.totalPending.toLocaleString("en-IN")}
           </p>
-          <span className="text-[11px] text-muted-foreground">
-            {overview.records.filter((r) => r.status === "PENDING").length} pending
+          <span className="text-[11px] text-[#8c5222] font-medium">
+            {overview.records.filter((r) => r.status === "PENDING").length} pending payments
           </span>
         </div>
       </div>
 
-      {/* Filter and Month Picker Toolbar */}
+      {/* -------------------------------------------------------------------- */}
+      {/* FILTER & MONTH SELECTOR TOOLBAR */}
+      {/* -------------------------------------------------------------------- */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-sm">
-          <LuSearch className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#858585]" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search trainer by name or email..."
-            className="w-full rounded-lg border border-input bg-card pl-9 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+            placeholder="Search by trainer name or email..."
+            className="w-full rounded-full border border-[rgba(40,40,40,0.08)] bg-white pl-9 pr-4 py-1.5 text-xs text-[#242424] placeholder:text-[#858585] focus:border-[#242424] focus:outline-none focus:ring-1 focus:ring-[#242424] shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <label htmlFor="monthPicker" className="text-xs font-semibold text-muted-foreground">
+          <label className="text-xs font-medium text-[#71697a]">
             Payroll Month:
           </label>
           <input
-            id="monthPicker"
             type="month"
             value={selectedMonth}
             onChange={(e) => handleMonthChange(e.target.value)}
-            className="rounded-lg border border-input bg-card px-3 py-1.5 text-xs font-semibold text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+            className="rounded-full border border-[rgba(40,40,40,0.08)] bg-white px-3 py-1.5 text-xs text-[#242424] focus:border-[#242424] focus:outline-none"
           />
         </div>
       </div>
 
-      {/* Salary Records Table */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      {/* -------------------------------------------------------------------- */}
+      {/* SALARIES DATA TABLE */}
+      {/* -------------------------------------------------------------------- */}
+      <div className="apple-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-[rgba(40,40,40,0.06)] bg-[#FAFAF8] text-[11px] font-medium text-[#71697a]">
               <tr>
-                <th className="px-6 py-4">Trainer</th>
-                <th className="px-6 py-4">Monthly Salary</th>
-                <th className="px-6 py-4">Due Day</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Disbursed At</th>
-                <th className="px-6 py-4 text-right">Action</th>
+                <th className="px-5 py-3.5">Trainer Staff</th>
+                <th className="px-5 py-3.5">Contact</th>
+                <th className="px-5 py-3.5">Disbursement Due Day</th>
+                <th className="px-5 py-3.5">Monthly Salary</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[rgba(40,40,40,0.05)]">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                    No trainer salary records found for {overview.month}.
+                  <td colSpan={6} className="px-6 py-12 text-center text-[#71697a]">
+                    {search ? "No trainer records match your search." : "No salary records for this month."}
                   </td>
                 </tr>
               ) : (
                 filteredRecords.map((r) => {
-                  const isMarking = markingId === r.id;
+                  const initials = r.trainerName
+                    ? r.trainerName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()
+                    : "T";
 
                   return (
-                    <tr
-                      key={r.id}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-foreground">{r.trainerName}</div>
-                        <div className="text-xs text-muted-foreground">{r.trainerEmail}</div>
-                        {r.trainerPhone && (
-                          <div className="text-[11px] font-mono text-muted-foreground">
-                            {r.trainerPhone}
+                    <tr key={r.id} className="hover:bg-stone-50/50 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f2f6d0] text-xs font-semibold text-[#242424]">
+                            {initials}
                           </div>
-                        )}
+                          <div>
+                            <p className="font-semibold text-[#242424]">{r.trainerName}</p>
+                            <p className="text-[11px] text-[#71697a]">{r.trainerEmail}</p>
+                          </div>
+                        </div>
                       </td>
 
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-sm font-bold text-foreground">
-                          ₹{r.amount.toLocaleString("en-IN")}
-                        </span>
+                      <td className="px-5 py-3.5 font-mono text-[11px] text-[#71697a]">
+                        {r.trainerPhone || "—"}
                       </td>
 
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <LuCalendar className="h-3.5 w-3.5" />
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-1.5 text-xs text-[#242424]">
+                          <Calendar className="h-3.5 w-3.5 text-[#71697a]" />
                           <span>Day {r.salaryDueDay} of month</span>
                         </div>
                       </td>
 
-                      <td className="px-6 py-4">
-                        <StatusBadge status={r.status} label={r.status} />
+                      <td className="px-5 py-3.5 font-mono text-xs font-semibold text-[#242424] tabular-nums">
+                        ₹{r.amount.toLocaleString("en-IN")}
                       </td>
 
-                      <td className="px-6 py-4 text-xs text-muted-foreground">
-                        {r.paidAt ? (
-                          <>
-                            <div className="font-medium text-foreground">
-                              {format(new Date(r.paidAt), "dd MMM yyyy")}
-                            </div>
-                            <div className="text-[11px]">
-                              {format(new Date(r.paidAt), "hh:mm a")}
-                            </div>
-                          </>
+                      <td className="px-5 py-3.5">
+                        <StatusBadge
+                          status={r.status}
+                          label={r.status === "PAID" ? "Disbursed" : "Pending Payment"}
+                        />
+                      </td>
+
+                      <td className="px-5 py-3.5 text-right">
+                        {r.status === "PAID" ? (
+                          <span className="text-[11px] font-mono text-[#71697a]">
+                            Paid {r.paidAt ? format(new Date(r.paidAt), "dd MMM") : ""}
+                          </span>
                         ) : (
-                          "—"
-                        )}
-                      </td>
-
-                      <td className="px-6 py-4 text-right">
-                        {r.status === "PENDING" ? (
                           <button
+                            type="button"
                             onClick={() => handleMarkPaid(r)}
-                            disabled={isMarking}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm"
+                            disabled={markingId === r.id}
+                            className="apple-button-press inline-flex items-center gap-1 rounded-full bg-[#242424] px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-[#383838]"
                           >
-                            {isMarking ? (
-                              <LuLoader className="h-3.5 w-3.5 animate-spin" />
+                            {markingId === r.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
                             ) : (
-                              <LuCheck className="h-3.5 w-3.5" />
+                              <Check className="h-3 w-3" />
                             )}
                             <span>Mark Paid</span>
                           </button>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                            <LuCheck className="h-3.5 w-3.5" />
-                            <span>Paid</span>
-                          </span>
                         )}
                       </td>
                     </tr>
@@ -254,4 +264,3 @@ export function SalariesTable({
     </div>
   );
 }
-

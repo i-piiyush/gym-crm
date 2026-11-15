@@ -3,9 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { CountdownRing } from "@/components/motion/CountdownRing";
-import { PressableButton } from "@/components/motion/PressableButton";
 import { motion, AnimatePresence } from "motion/react";
-import { LuMaximize2, LuMinimize2, LuQrCode, LuShieldCheck } from "react-icons/lu";
+import { Maximize2, Minimize2, QrCode, ShieldCheck, Link2 } from "lucide-react";
 
 interface QrCodeStationProps {
   gymId: string;
@@ -26,6 +25,28 @@ export function QrCodeStation({
   const [secondsRemaining, setSecondsRemaining] = useState(initialSecondsRemaining);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Dynamic base URL resolution for mobile scanners:
+  // 1. process.env.NEXT_PUBLIC_APP_URL if explicitly non-localhost (e.g. http://172.20.10.2:3000)
+  // 2. window.location.origin if tablet/browser is opened via local IP or public domain
+  // 3. appUrl prop passed from server
+  const [resolvedBaseUrl, setResolvedBaseUrl] = useState(appUrl);
+
+  useEffect(() => {
+    const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, "");
+    if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+      setResolvedBaseUrl(envUrl);
+    } else if (
+      typeof window !== "undefined" &&
+      window.location.origin &&
+      !window.location.origin.includes("localhost") &&
+      !window.location.origin.includes("127.0.0.1")
+    ) {
+      setResolvedBaseUrl(window.location.origin);
+    } else if (appUrl) {
+      setResolvedBaseUrl(appUrl.replace(/\/+$/, ""));
+    }
+  }, [appUrl]);
+
   // Fetch rotating token from client endpoint
   const refreshToken = useCallback(async () => {
     try {
@@ -33,7 +54,7 @@ export function QrCodeStation({
       if (res.ok) {
         const data = await res.json();
         setToken(data.token);
-        setSecondsRemaining(data.secondsRemaining);
+        setSecondsRemaining(data.secondsRemaining || 300);
       }
     } catch (e) {
       console.error("Failed to rotate QR token:", e);
@@ -46,7 +67,7 @@ export function QrCodeStation({
       setSecondsRemaining((prev) => {
         if (prev <= 1) {
           refreshToken();
-          return 15;
+          return 300;
         }
         return prev - 1;
       });
@@ -64,53 +85,52 @@ export function QrCodeStation({
     }
   };
 
-  const checkInUrl = `${appUrl}/checkin?t=${encodeURIComponent(token)}`;
+  const checkInUrl = `${resolvedBaseUrl}/checkin?t=${encodeURIComponent(token)}`;
 
   return (
     <div
       className={`flex flex-col items-center justify-center transition-all ${
         isFullscreen
-          ? "fixed inset-0 z-50 bg-background p-8"
-          : "rounded-3xl border border-border bg-card p-8 shadow-sm"
+          ? "fixed inset-0 z-50 bg-[#FAFAF8] p-8"
+          : "apple-card p-8"
       }`}
     >
       {/* Station Header */}
-      <div className="flex w-full items-center justify-between border-b border-border pb-4">
+      <div className="flex w-full items-center justify-between border-b border-[rgba(40,40,40,0.06)] pb-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <LuQrCode className="h-5 w-5" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#242424] text-white shadow-sm">
+            <QrCode className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground">{gymName}</h1>
-            <p className="text-xs text-muted-foreground">
-              Reception Attendance Station · 15s Dynamic Geofence QR
+            <h1 className="text-base font-semibold text-[#242424]">{gymName}</h1>
+            <p className="text-xs text-[#71697a]">
+              Reception Check-in Station • 5-Minute Dynamic Geofence QR
             </p>
           </div>
         </div>
 
-        <PressableButton
-          variant="outline"
-          size="sm"
+        <button
+          type="button"
           onClick={toggleFullscreen}
-          className="flex items-center gap-1.5"
+          className="apple-button-press inline-flex items-center gap-1.5 rounded-full border border-[rgba(40,40,40,0.08)] bg-white px-3.5 py-1.5 text-xs font-medium text-[#242424] hover:bg-stone-50"
         >
           {isFullscreen ? (
             <>
-              <LuMinimize2 className="h-4 w-4" />
+              <Minimize2 className="h-3.5 w-3.5" />
               <span>Exit Fullscreen</span>
             </>
           ) : (
             <>
-              <LuMaximize2 className="h-4 w-4" />
-              <span>Fullscreen Station</span>
+              <Maximize2 className="h-3.5 w-3.5" />
+              <span>Fullscreen Kiosk</span>
             </>
           )}
-        </PressableButton>
+        </button>
       </div>
 
       {/* Main QR Display */}
       <div className="my-8 flex flex-col items-center justify-center">
-        <div className="relative rounded-3xl border-4 border-primary/20 bg-white p-6 shadow-xl dark:border-primary/40">
+        <div className="relative rounded-3xl border-4 border-stone-200/80 bg-white p-6 shadow-xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={token}
@@ -121,7 +141,7 @@ export function QrCodeStation({
             >
               <QRCodeSVG
                 value={checkInUrl}
-                size={isFullscreen ? 360 : 280}
+                size={isFullscreen ? 360 : 260}
                 level="M"
                 includeMargin={false}
               />
@@ -129,33 +149,40 @@ export function QrCodeStation({
           </AnimatePresence>
         </div>
 
-        {/* 15-second Animated Countdown Ring */}
-        <div className="mt-6 flex items-center gap-3">
+        {/* Target URL Badge */}
+        <div className="mt-3 flex items-center gap-1.5 rounded-full bg-slate-100/80 dark:bg-slate-800/60 px-3 py-1 text-[11px] font-mono text-[#71697a] border border-border/40">
+          <Link2 className="h-3 w-3 text-dim" />
+          <span className="truncate max-w-[280px]">
+            {checkInUrl.split("?")[0]}
+          </span>
+        </div>
+
+        {/* 5-minute Animated Countdown Ring */}
+        <div className="mt-5 flex items-center gap-3">
           <CountdownRing
-            totalSeconds={15}
+            totalSeconds={300}
             secondsRemaining={secondsRemaining}
-            size={48}
-            strokeWidth={4}
+            size={50}
+            strokeWidth={3.5}
           />
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold text-foreground">
-              Auto-refreshing dynamic code
+          <div className="flex flex-col text-left">
+            <span className="text-xs font-semibold text-[#242424]">
+              Rotates every 5 minutes
             </span>
-            <span className="text-[11px] text-muted-foreground">
-              Stateless HMAC-SHA256 window
+            <span className="text-[11px] text-[#71697a] font-mono">
+              HMAC-SHA256 hardware token
             </span>
           </div>
         </div>
       </div>
 
       {/* Instructions Banner */}
-      <div className="flex max-w-md items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-xs text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
-        <LuShieldCheck className="h-6 w-6 shrink-0 text-primary" />
+      <div className="flex max-w-md items-center gap-3 rounded-2xl border border-[rgba(40,40,40,0.06)] bg-[#d0e1d4]/30 p-4 text-xs text-emerald-950">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-800" />
         <p className="leading-relaxed">
-          Members & trainers: Scan this QR with your mobile camera. Your phone will verify you are within 50 meters of the facility to mark attendance.
+          Members &amp; trainers: Scan this QR with your mobile camera. Your phone will verify you are within the facility geofence to log attendance.
         </p>
       </div>
     </div>
   );
 }
-

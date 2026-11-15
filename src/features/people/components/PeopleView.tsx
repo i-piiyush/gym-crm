@@ -11,11 +11,18 @@ import {
 import { CustomersTable } from "./CustomersTable";
 import { TrainersTable } from "./TrainersTable";
 import { AddPersonDialog } from "./AddPersonDialog";
-import { PressableButton } from "@/components/motion/PressableButton";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { revokeInviteAction } from "@/actions/person.actions";
 import { toast } from "sonner";
-import { LuUserPlus, LuUsers, LuDumbbell, LuMailQuestion, LuTrash2 } from "react-icons/lu";
+import {
+  Users,
+  Dumbbell,
+  Mail,
+  UserPlus,
+  Trash2,
+  Activity,
+  CheckCircle2,
+} from "lucide-react";
 
 interface PeopleViewProps {
   trainers: TrainerListItem[];
@@ -45,13 +52,7 @@ export function PeopleView({
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState(initialPendingInvites);
 
-  const capacityRatio = capacity.totalCount / capacity.maxCustomers;
-  const capacityBadgeColor =
-    capacityRatio >= 1
-      ? "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300"
-      : capacityRatio >= 0.8
-      ? "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300"
-      : "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300";
+  const capacityRatio = Math.min(100, Math.round((capacity.totalCount / capacity.maxCustomers) * 100));
 
   const handleRevokeInvite = async (invitationId: string) => {
     try {
@@ -69,30 +70,31 @@ export function PeopleView({
 
   return (
     <div className="space-y-6">
-      {/* Top action & capacity status banner */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <LuUsers className="h-6 w-6" />
+      {/* -------------------------------------------------------------------- */}
+      {/* TOP CAPACITY & STATS BANNER */}
+      {/* -------------------------------------------------------------------- */}
+      <div className="apple-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#242424] text-white shadow-sm">
+            <Users className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-foreground">
-                Staff & Members
+              <h2 className="text-base font-semibold text-[#242424]">
+                Member Directory & Staff
               </h2>
-              <span
-                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold tracking-wide ${capacityBadgeColor}`}
-              >
-                Customers: {capacity.totalCount} / {capacity.maxCustomers}
+              <span className="rounded-full bg-[#d0e1d4]/50 px-2.5 py-0.5 text-xs font-semibold text-emerald-900">
+                {capacity.totalCount} / {capacity.maxCustomers} Enrolled
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {capacity.activeCount} active customers, {capacity.pendingInvites} pending invitations
+            <p className="mt-0.5 text-xs text-[#71697a]">
+              {capacity.activeCount} active members, {capacity.pendingInvites} pending invitations • {capacityRatio}% facility capacity
             </p>
           </div>
         </div>
 
-        <PressableButton
+        <button
+          type="button"
           onClick={() => {
             if (capacity.isAtCapacity) {
               toast.error(
@@ -101,53 +103,62 @@ export function PeopleView({
             }
             setIsAddOpen(true);
           }}
-          className="shrink-0 flex items-center gap-2"
+          className="apple-button-press inline-flex items-center justify-center gap-2 rounded-full bg-[#242424] px-5 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#383838]"
         >
-          <LuUserPlus className="h-4 w-4" />
-          <span>Add Person</span>
-        </PressableButton>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-border pb-2">
-        <button
-          onClick={() => setActiveTab("CUSTOMERS")}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-            activeTab === "CUSTOMERS"
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
-          }`}
-        >
-          <LuUsers className="h-4 w-4" />
-          <span>Customers ({customers.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("TRAINERS")}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-            activeTab === "TRAINERS"
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
-          }`}
-        >
-          <LuDumbbell className="h-4 w-4" />
-          <span>Trainers ({trainers.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("INVITES")}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-            activeTab === "INVITES"
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
-          }`}
-        >
-          <LuMailQuestion className="h-4 w-4" />
-          <span>Pending Invitations ({pendingInvites.length})</span>
+          <UserPlus className="h-3.5 w-3.5" />
+          <span>Add Member or Staff</span>
         </button>
       </div>
 
-      {/* Tab Panels */}
+      {/* -------------------------------------------------------------------- */}
+      {/* APPLE TABS SWITCHER PILL */}
+      {/* -------------------------------------------------------------------- */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-[rgba(40,40,40,0.06)] pb-3">
+        <div className="inline-flex rounded-full bg-stone-100 p-1 text-xs">
+          <button
+            type="button"
+            onClick={() => setActiveTab("CUSTOMERS")}
+            className={`apple-button-press flex items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
+              activeTab === "CUSTOMERS"
+                ? "bg-white text-[#242424] shadow-sm font-semibold"
+                : "text-[#71697a] hover:text-[#242424]"
+            }`}
+          >
+            <Users className="h-3.5 w-3.5" />
+            <span>Customers ({customers.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("TRAINERS")}
+            className={`apple-button-press flex items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
+              activeTab === "TRAINERS"
+                ? "bg-white text-[#242424] shadow-sm font-semibold"
+                : "text-[#71697a] hover:text-[#242424]"
+            }`}
+          >
+            <Dumbbell className="h-3.5 w-3.5" />
+            <span>Coaching Staff ({trainers.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("INVITES")}
+            className={`apple-button-press flex items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
+              activeTab === "INVITES"
+                ? "bg-white text-[#242424] shadow-sm font-semibold"
+                : "text-[#71697a] hover:text-[#242424]"
+            }`}
+          >
+            <Mail className="h-3.5 w-3.5" />
+            <span>Pending Invites ({pendingInvites.length})</span>
+          </button>
+        </div>
+      </div>
+
+      {/* -------------------------------------------------------------------- */}
+      {/* TAB CONTENT PANELS */}
+      {/* -------------------------------------------------------------------- */}
       {activeTab === "CUSTOMERS" && (
         <CustomersTable customers={customers} trainers={trainerOptions} />
       )}
@@ -157,49 +168,42 @@ export function PeopleView({
       )}
 
       {activeTab === "INVITES" && (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="apple-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-border bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-[rgba(40,40,40,0.06)] bg-[#FAFAF8] text-[11px] font-medium text-[#71697a]">
                 <tr>
-                  <th className="px-6 py-4">Invited Email</th>
-                  <th className="px-6 py-4">Assigned Role</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Action</th>
+                  <th className="px-5 py-3.5">Invited Email</th>
+                  <th className="px-5 py-3.5">Assigned Role</th>
+                  <th className="px-5 py-3.5">Status</th>
+                  <th className="px-5 py-3.5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-[rgba(40,40,40,0.05)]">
                 {pendingInvites.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="px-6 py-12 text-center text-muted-foreground"
-                    >
+                    <td colSpan={4} className="px-6 py-12 text-center text-[#71697a]">
                       No pending invitations at this time.
                     </td>
                   </tr>
                 ) : (
                   pendingInvites.map((inv) => (
-                    <tr
-                      key={inv.id}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20"
-                    >
-                      <td className="px-6 py-4 font-medium text-foreground">
-                        {inv.email}
-                      </td>
-                      <td className="px-6 py-4 text-xs font-semibold">
+                    <tr key={inv.id} className="hover:bg-stone-50/50 transition-colors">
+                      <td className="px-5 py-3.5 font-medium text-[#242424]">{inv.email}</td>
+                      <td className="px-5 py-3.5 text-[#71697a] uppercase text-[11px] font-semibold">
                         {inv.role}
                       </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status="INVITED" />
+                      <td className="px-5 py-3.5">
+                        <StatusBadge status="PENDING" label="Invite Pending" />
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-5 py-3.5 text-right">
                         <button
+                          type="button"
                           onClick={() => handleRevokeInvite(inv.id)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                          title="Revoke Invitation"
+                          className="apple-button-press inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-100"
                         >
-                          <LuTrash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
+                          <span>Revoke</span>
                         </button>
                       </td>
                     </tr>
@@ -211,16 +215,19 @@ export function PeopleView({
         </div>
       )}
 
-      {/* Add Person Modal Dialog */}
-      <AddPersonDialog
-        isOpen={isAddOpen}
-        onClose={() => setIsAddOpen(false)}
-        trainerOptions={trainerOptions}
-        plans={plans}
-        isAtCapacity={capacity.isAtCapacity}
-        capacityText={`${capacity.totalCount}/${capacity.maxCustomers}`}
-      />
+      {/* -------------------------------------------------------------------- */}
+      {/* ADD PERSON DIALOG */}
+      {/* -------------------------------------------------------------------- */}
+      {isAddOpen && (
+        <AddPersonDialog
+          isOpen={isAddOpen}
+          onClose={() => setIsAddOpen(false)}
+          trainers={trainerOptions}
+          plans={plans}
+          isAtCapacity={capacity.isAtCapacity}
+          capacity={capacity}
+        />
+      )}
     </div>
   );
 }
-

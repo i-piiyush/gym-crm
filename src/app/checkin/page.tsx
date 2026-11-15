@@ -4,7 +4,8 @@ import { syncUserFromClerk } from "@/services/auth.service";
 import { CheckInCard } from "@/features/attendance/components/CheckInCard";
 import prisma from "@/db/client";
 import { ROUTES } from "@/constants/routes";
-import { LuDumbbell } from "react-icons/lu";
+import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -34,36 +35,49 @@ export default async function CheckInPage({ searchParams }: CheckInPageProps) {
   const { t } = await searchParams;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 py-8 dark:bg-slate-950 sm:p-6 lg:p-12">
-      <div className="mx-auto max-w-lg mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <LuDumbbell className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="text-base font-bold text-foreground">
-              {gym?.name || "Gym CRM"}
-            </span>
-            <p className="text-[11px] text-muted-foreground">
-              Signed in as {sync.user.name} ({sync.user.role})
-            </p>
+    <div className="min-h-screen bg-background px-4 py-8 sm:py-12 flex flex-col justify-between">
+      <div className="mx-auto w-full max-w-md">
+        {/* Top Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-foreground text-background font-semibold text-xs transition-transform group-hover:scale-105">
+              G
+            </div>
+            <div>
+              <span className="text-xs font-semibold tracking-tight text-foreground block">
+                GYM-OS
+              </span>
+              <span className="text-[10px] text-dim block -mt-0.5">
+                Attendance Check-in
+              </span>
+            </div>
+          </Link>
+
+          <div className="flex items-center gap-1.5 rounded-full bg-honeydew/40 border border-[#B5D5BD] px-2.5 py-1 text-[11px] font-medium text-[#204E2B]">
+            <ShieldCheck className="h-3 w-3" />
+            <span className="truncate max-w-[120px]">{sync.user.name}</span>
           </div>
         </div>
+
+        {/* Check-In Card */}
+        <CheckInCard
+          initialToken={t || ""}
+          gymName={gym?.name || "Facility"}
+          userRole={sync.user.role}
+          gymCoords={
+            gym
+              ? {
+                  latitude: Number(gym.latitude),
+                  longitude: Number(gym.longitude),
+                }
+              : undefined
+          }
+        />
       </div>
 
-      <CheckInCard
-        initialToken={t || ""}
-        gymName={gym?.name || "Gym"}
-        gymCoords={
-          gym
-            ? {
-                latitude: Number(gym.latitude),
-                longitude: Number(gym.longitude),
-              }
-            : undefined
-        }
-      />
+      <div className="mt-8 text-center text-[11px] text-dim/60">
+        GYM-OS Geofence Attendance Engine · 50m Secure Radius
+      </div>
     </div>
   );
 }
-

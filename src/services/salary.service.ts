@@ -10,11 +10,7 @@ export async function getSalariesForGymAndMonth(
   month?: string
 ) {
   const targetMonth = month || getCurrentMonthString();
-
-  // Safety net: ensure records exist for the month whenever accessed
-  await salaryRepo.ensureSalaryRecordsForMonth(gymId, targetMonth);
-
-  return salaryRepo.listSalariesByGymAndMonth(gymId, targetMonth);
+  return salaryRepo.getSalariesOverviewOptimized(gymId, targetMonth);
 }
 
 export async function markSalaryPaid(gymId: string, salaryRecordId: string) {

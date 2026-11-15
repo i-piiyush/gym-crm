@@ -1,20 +1,26 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { getPortalSession } from "@/lib/session";
-import { getGymDetails } from "@/services/gym.service";
-import { listPlansByGym } from "@/db/repositories/plan.repo";
+import { getGymSettingsData } from "@/services/gym.service";
 import { PlansCrud } from "@/features/settings/components/PlansCrud";
 import { notFound } from "next/navigation";
-import { LuMapPin, LuLock, LuExternalLink, LuBuilding2 } from "react-icons/lu";
+import {
+  MapPin,
+  Lock,
+  ExternalLink,
+  Building2,
+  Clock,
+  Users,
+  Receipt,
+  Radio,
+  ShieldCheck,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
   const session = await getPortalSession("ADMIN");
-  const [gym, plans] = await Promise.all([
-    getGymDetails(session.gymId!),
-    listPlansByGym(session.gymId!),
-  ]);
+  const { gym, plans } = await getGymSettingsData(session.gymId!);
 
   if (!gym) {
     notFound();
@@ -29,122 +35,157 @@ export default async function AdminSettingsPage() {
   }));
 
   return (
-    <FadeIn className="space-y-6 max-w-4xl">
+    <FadeIn className="space-y-8 max-w-5xl">
       <PageHeader
-        title="Gym Settings & Profile"
-        description="Facility operational information, membership plans, receipt configuration, and geofence specifications."
+        title="Settings & Configuration"
+        description="Facility operational profiles, membership pricing tiers, invoice numbering, and geofence coordinates."
       />
 
       {/* Membership Plans CRUD */}
       <PlansCrud initialPlans={serializedPlans} />
 
-      {/* Facility Profile */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-2.5 border-b border-border pb-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-primary dark:bg-emerald-950/40">
-            <LuBuilding2 className="h-5 w-5" />
+      {/* Facility Profile Card */}
+      <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="flex items-center justify-between border-b border-border/50 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-honeydew/40 text-foreground">
+              <Building2 className="h-5 w-5 text-[#204E2B]" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-foreground tracking-tight">
+                Facility Operational Profile
+              </h2>
+              <p className="text-xs text-dim mt-0.5">
+                Physical location parameters, receipt sequences, and member capacity constraints.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base font-bold text-foreground">{gym.name}</h2>
-            <p className="text-xs text-muted-foreground">{gym.address}</p>
-          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-honeydew/50 border border-[#B5D5BD] px-2.5 py-1 text-[11px] font-medium text-[#204E2B]">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>Verified Facility</span>
+          </span>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-3 mt-6">
-          <div className="rounded-xl border border-border bg-slate-50/50 p-4 dark:bg-slate-900/40">
-            <span className="text-xs font-medium text-muted-foreground">Receipt Prefix</span>
-            <p className="mt-1 font-mono text-base font-bold text-foreground">
+        {/* Facility metadata list */}
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-xl border border-border/70 bg-[#F5F5F3]/50 p-4">
+            <div className="flex items-center gap-1.5 text-xs text-dim">
+              <Building2 className="h-3.5 w-3.5 text-dim/80" />
+              <span className="font-medium">Facility Name</span>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-foreground tracking-tight">
+              {gym.name}
+            </p>
+            <p className="mt-1 text-xs text-dim line-clamp-1">
+              {gym.address}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-border/70 bg-[#F5F5F3]/50 p-4">
+            <div className="flex items-center gap-1.5 text-xs text-dim">
+              <Receipt className="h-3.5 w-3.5 text-dim/80" />
+              <span className="font-medium">Receipt Invoice Prefix</span>
+            </div>
+            <p className="mt-2 font-mono text-sm font-semibold text-foreground tracking-wider">
               {gym.receiptPrefix}
             </p>
-            <span className="text-[11px] text-muted-foreground">
-              Used in {gym.receiptPrefix}-YYYY-XXXXX
-            </span>
+            <p className="mt-1 text-xs text-dim">
+              Sequential syntax: <code className="text-[11px] font-mono text-foreground">{gym.receiptPrefix}-YYYY-XXXXX</code>
+            </p>
           </div>
 
-          <div className="rounded-xl border border-border bg-slate-50/50 p-4 dark:bg-slate-900/40">
-            <span className="text-xs font-medium text-muted-foreground">Operating Timezone</span>
-            <p className="mt-1 text-base font-bold text-foreground">
+          <div className="rounded-xl border border-border/70 bg-[#F5F5F3]/50 p-4">
+            <div className="flex items-center gap-1.5 text-xs text-dim">
+              <Clock className="h-3.5 w-3.5 text-dim/80" />
+              <span className="font-medium">Operating Timezone</span>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-foreground">
               {gym.timezone}
             </p>
-            <span className="text-[11px] text-muted-foreground">
-              Local day boundaries for check-in
-            </span>
+            <p className="mt-1 text-xs text-dim">
+              Calculates midnight check-in reset windows
+            </p>
           </div>
 
-          <div className="rounded-xl border border-border bg-slate-50/50 p-4 dark:bg-slate-900/40">
-            <span className="text-xs font-medium text-muted-foreground">Customer Capacity</span>
-            <p className="mt-1 text-base font-bold text-foreground">
-              {gym.maxCustomers} members
+          <div className="rounded-xl border border-border/70 bg-[#F5F5F3]/50 p-4">
+            <div className="flex items-center gap-1.5 text-xs text-dim">
+              <Users className="h-3.5 w-3.5 text-dim/80" />
+              <span className="font-medium">Customer Membership Cap</span>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-foreground tabular-nums">
+              {gym.maxCustomers.toLocaleString()} active members
             </p>
-            <span className="text-[11px] text-muted-foreground">
-              Enforced server-side limit
-            </span>
+            <p className="mt-1 text-xs text-dim">
+              Hard limit enforced during customer intake
+            </p>
           </div>
         </div>
       </div>
 
       {/* Read-Only GPS Coordinates Notice */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-              <LuMapPin className="h-5 w-5" />
+      <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border/50 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-desert/20 text-foreground">
+              <Radio className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-foreground">
-                Attendance GPS Geofence (Read-Only)
-              </h2>
-              <p className="text-xs text-muted-foreground">
-                Physical check-in boundaries configured for this facility.
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-foreground tracking-tight">
+                  Attendance GPS Geofence
+                </h2>
+                <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-[#F5F5F3] px-2 py-0.5 text-[11px] font-medium text-dim">
+                  <Lock className="h-3 w-3" />
+                  <span>Locked</span>
+                </span>
+              </div>
+              <p className="text-xs text-dim mt-0.5">
+                Physical perimeter used by the verification engine to validate check-in proximity.
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            <LuLock className="h-3.5 w-3.5" />
-            <span>Read-Only</span>
-          </span>
+
+          <a
+            href={`https://www.google.com/maps?q=${gym.latitude},${gym.longitude}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:bg-surface active:scale-[0.98] transition-all self-start sm:self-auto"
+          >
+            <MapPin className="h-3.5 w-3.5 text-dim" />
+            <span>Open in Google Maps</span>
+            <ExternalLink className="h-3 w-3 text-dim" />
+          </a>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-border bg-slate-50/70 p-4 dark:bg-slate-900/50">
-            <span className="text-xs font-medium text-muted-foreground">Latitude</span>
-            <p className="mt-1 font-mono text-sm font-semibold text-foreground">
-              {gym.latitude.toFixed(6)}
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-border/70 bg-[#F5F5F3]/50 p-4">
+            <span className="text-xs font-medium text-dim">Latitude Coordinate</span>
+            <p className="mt-1 font-mono text-sm font-semibold text-foreground tabular-nums">
+              {gym.latitude.toFixed(6)}°
             </p>
           </div>
 
-          <div className="rounded-xl border border-border bg-slate-50/70 p-4 dark:bg-slate-900/50">
-            <span className="text-xs font-medium text-muted-foreground">Longitude</span>
-            <p className="mt-1 font-mono text-sm font-semibold text-foreground">
-              {gym.longitude.toFixed(6)}
+          <div className="rounded-xl border border-border/70 bg-[#F5F5F3]/50 p-4">
+            <span className="text-xs font-medium text-dim">Longitude Coordinate</span>
+            <p className="mt-1 font-mono text-sm font-semibold text-foreground tabular-nums">
+              {gym.longitude.toFixed(6)}°
             </p>
           </div>
 
-          <div className="rounded-xl border border-border bg-slate-50/70 p-4 dark:bg-slate-900/50">
-            <span className="text-xs font-medium text-muted-foreground">Check-in Radius</span>
-            <p className="mt-1 text-sm font-semibold text-foreground">
+          <div className="rounded-xl border border-border/70 bg-[#F5F5F3]/50 p-4">
+            <span className="text-xs font-medium text-dim">Allowed Perimeter Radius</span>
+            <p className="mt-1 text-sm font-semibold text-foreground tabular-nums">
               {gym.attendanceRadiusMeters} meters
             </p>
           </div>
         </div>
 
         <div className="mt-4 flex items-center justify-between pt-2">
-          <a
-            href={`https://www.google.com/maps?q=${gym.latitude},${gym.longitude}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-          >
-            <span>View geofence center on Google Maps</span>
-            <LuExternalLink className="h-3.5 w-3.5" />
-          </a>
-
-          <p className="text-[11px] text-muted-foreground italic">
-            Geofence coordinates are locked. Contact platform Super Admin to adjust location.
+          <p className="text-xs text-dim">
+            Geofence parameters are immutable at facility level to prevent location spoofing. To recalibrate coordinates, contact platform engineering.
           </p>
         </div>
       </div>
     </FadeIn>
   );
 }
-

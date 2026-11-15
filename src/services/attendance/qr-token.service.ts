@@ -1,6 +1,8 @@
 import crypto from "crypto";
 
-const QR_WINDOW_MS = 15 * 1000; // 15 seconds
+// 5 minutes (300 seconds) rotating window
+const QR_WINDOW_MS = 5 * 60 * 1000;
+const TOTAL_SECONDS = 300;
 
 function getSecret(): string {
   const secret = process.env.QR_TOKEN_SECRET;
@@ -27,8 +29,8 @@ export function generateQrToken(gymId: string, nowMs = Date.now()) {
   return {
     token,
     windowStart,
-    secondsRemaining: secondsRemaining === 0 ? 15 : secondsRemaining,
-    totalSeconds: 15,
+    secondsRemaining: secondsRemaining === 0 ? TOTAL_SECONDS : secondsRemaining,
+    totalSeconds: TOTAL_SECONDS,
   };
 }
 
@@ -51,7 +53,7 @@ export function verifyQrToken(
     return { isValid: false, reason: "Invalid window timestamp." };
   }
 
-  // Dual-window validation: Allow current window and immediate previous window (15s + 15s = 30s validity)
+  // Dual-window validation: Allow current 5-min window and immediate previous 5-min window (10 min total tolerance)
   const currentWindowStart = Math.floor(nowMs / QR_WINDOW_MS) * QR_WINDOW_MS;
   const previousWindowStart = currentWindowStart - QR_WINDOW_MS;
 
@@ -80,4 +82,3 @@ export function verifyQrToken(
 
   return { isValid: true };
 }
-

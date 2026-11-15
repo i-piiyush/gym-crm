@@ -14,20 +14,33 @@ import { LuX, LuUserPlus, LuShieldAlert } from "react-icons/lu";
 interface AddPersonDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  trainerOptions: TrainerOption[];
+  trainerOptions?: TrainerOption[];
+  trainers?: TrainerOption[];
   plans: PlanOption[];
   isAtCapacity: boolean;
-  capacityText: string;
+  capacityText?: string;
+  capacity?: {
+    activeCount: number;
+    pendingInvites: number;
+    totalCount: number;
+    maxCustomers: number;
+    isAtCapacity: boolean;
+    gymName: string;
+  };
 }
 
 export function AddPersonDialog({
   isOpen,
   onClose,
-  trainerOptions,
+  trainerOptions: rawOptions,
+  trainers: rawTrainers,
   plans,
   isAtCapacity,
-  capacityText,
+  capacityText: rawCapText,
+  capacity,
 }: AddPersonDialogProps) {
+  const trainerOptions = rawOptions || rawTrainers || [];
+  const capacityText = rawCapText || (capacity ? `${capacity.totalCount}/${capacity.maxCustomers}` : "");
   const [selectedRole, setSelectedRole] = useState<"CUSTOMER" | "TRAINER">("CUSTOMER");
   const [isSubmitting, setIsSubmitting] = useState(false);
 

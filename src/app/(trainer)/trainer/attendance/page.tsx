@@ -11,16 +11,21 @@ export default async function TrainerAttendancePage() {
 
   const rawAttendances = await prisma.attendance.findMany({
     where: { userId: session.userId },
+    select: {
+      id: true,
+      date: true,
+      checkInAt: true,
+      distanceMeters: true,
+      accuracyMeters: true,
+    },
     orderBy: { checkInAt: "desc" },
     take: 60,
   });
 
   const attendances = rawAttendances.map((a) => ({
     ...a,
-    latitude: Number(a.latitude),
-    longitude: Number(a.longitude),
-    accuracyMeters: Number(a.accuracyMeters),
     distanceMeters: Number(a.distanceMeters),
+    accuracyMeters: Number(a.accuracyMeters),
   }));
 
   return (

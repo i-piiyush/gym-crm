@@ -4,15 +4,16 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import {
-  LuQrCode,
-  LuCalendarCheck,
-  LuFlame,
-  LuMapPin,
-  LuUser,
-  LuClock,
-  LuCreditCard,
-  LuArrowRight,
-} from "react-icons/lu";
+  QrCode,
+  CalendarCheck,
+  Flame,
+  MapPin,
+  User,
+  Clock,
+  ArrowRight,
+  ShieldCheck,
+  Calendar,
+} from "lucide-react";
 
 interface CustomerOverviewProps {
   data: {
@@ -73,57 +74,59 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
   return (
     <div className="space-y-6">
       {/* Top Welcome & Quick Check-in Banner */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-primary/20 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-6 shadow-sm">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div>
-          <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-            {profile.user.gym?.name || "Fitness Center"}
-          </span>
-          <h2 className="text-xl font-bold text-foreground mt-1">
-            Welcome back, {profile.user.name.split(" ")[0]}!
+          <div className="flex items-center gap-1.5 text-xs text-dim mb-1">
+            <span className="font-medium uppercase tracking-wider">
+              {profile.user.gym?.name || "Fitness Center"}
+            </span>
+          </div>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            Welcome back, {profile.user.name.split(" ")[0]}
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Scan the reception QR station to log today&apos;s workout session.
+          <p className="text-xs text-dim mt-0.5">
+            Scan the reception QR station or check in to log today&apos;s workout.
           </p>
         </div>
 
         <Link
           href="/checkin"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/90 transition-all hover:scale-[1.02] shrink-0"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-xs font-medium text-background hover:bg-foreground/90 active:scale-[0.98] transition-all shadow-sm shrink-0"
         >
-          <LuQrCode className="h-5 w-5" />
-          <span>Scan to Check In</span>
+          <QrCode className="h-4 w-4" />
+          <span>Check In Now</span>
         </Link>
       </div>
 
       {/* Grid: Membership Pass & Assigned Trainer */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Membership Pass Card */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm flex flex-col justify-between">
+        <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">
-                Active Membership Pass
+            <div className="flex items-center justify-between border-b border-border/50 pb-3.5">
+              <span className="text-xs font-medium text-dim uppercase tracking-wider">
+                Membership Pass
               </span>
               <StatusBadge status={profile.status} label={profile.status} />
             </div>
 
             <div className="mt-4">
-              <h3 className="text-lg font-bold text-foreground">
-                {profile.plan?.name || (profile.status === "TRIAL" ? "Free Trial Pass" : "Custom Membership")}
+              <h3 className="text-lg font-semibold text-foreground tracking-tight">
+                {profile.plan?.name || (profile.status === "TRIAL" ? "Free Trial Pass" : "Active Membership")}
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">{validityText}</p>
+              <p className="text-xs text-dim mt-1">{validityText}</p>
             </div>
           </div>
 
-          <div className="mt-6 flex items-center justify-between rounded-xl bg-slate-50/70 p-3.5 border border-border/60 dark:bg-slate-900/40">
-            <div className="flex items-center gap-2 text-xs">
-              <LuClock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Pass Expiration:</span>
+          <div className="mt-6 flex items-center justify-between rounded-xl bg-[#F5F5F3]/60 p-3.5 border border-border/60">
+            <div className="flex items-center gap-2 text-xs text-dim">
+              <Clock className="h-3.5 w-3.5" />
+              <span>Pass Validity:</span>
             </div>
             <span
-              className={`font-mono text-xs font-bold ${
+              className={`font-semibold text-xs tabular-nums ${
                 daysLeft !== null && daysLeft <= 3
-                  ? "text-rose-600 dark:text-rose-400"
+                  ? "text-rose-600"
                   : "text-foreground"
               }`}
             >
@@ -137,122 +140,123 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
         </div>
 
         {/* Assigned Trainer Card */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm flex flex-col justify-between">
+        <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">
-                Assigned Personal Trainer
+            <div className="flex items-center justify-between border-b border-border/50 pb-3.5">
+              <span className="text-xs font-medium text-dim uppercase tracking-wider">
+                Assigned Coach
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
-                <LuUser className="h-3 w-3" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-honeydew/50 border border-[#B5D5BD] px-2.5 py-0.5 text-[11px] font-medium text-[#204E2B]">
+                <User className="h-3 w-3" />
                 <span>Coach</span>
               </span>
             </div>
 
             <div className="mt-4">
-              <h3 className="text-lg font-bold text-foreground">
-                {profile.trainer?.name || "Dedicated Coaching Staff"}
+              <h3 className="text-lg font-semibold text-foreground tracking-tight">
+                {profile.trainer?.name || "Facility Coaching Staff"}
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {profile.trainer?.email}
+              <p className="text-xs text-dim mt-1">
+                {profile.trainer?.email || "Assigned on facility floor"}
               </p>
               {profile.trainer?.phone && (
-                <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                <p className="text-xs font-mono text-dim mt-0.5 tabular-nums">
                   {profile.trainer.phone}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="mt-6 flex items-center gap-2 text-[11px] text-muted-foreground italic">
-            <span>Your assigned trainer monitors your check-ins and fitness progress.</span>
+          <div className="mt-6 flex items-center gap-1.5 text-xs text-dim">
+            <ShieldCheck className="h-3.5 w-3.5 text-dim/70" />
+            <span>Monitors workout consistency and attendance records</span>
           </div>
         </div>
       </div>
 
       {/* KPI Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">
+            <span className="text-xs font-medium text-dim uppercase tracking-wider">
               Workouts This Month
             </span>
-            <LuCalendarCheck className="h-4 w-4 text-primary" />
+            <CalendarCheck className="h-4 w-4 text-dim" />
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-foreground">
-            {thisMonthCount} <span className="text-xs font-normal text-muted-foreground">days</span>
+          <p className="mt-2 text-2xl font-semibold font-mono text-foreground tabular-nums tracking-tight">
+            {thisMonthCount} <span className="text-xs font-normal text-dim">sessions</span>
           </p>
-          <span className="text-[11px] text-muted-foreground">Gym sessions verified by GPS</span>
+          <span className="text-xs text-dim mt-1 block">Verified by GPS geofence</span>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">
+            <span className="text-xs font-medium text-dim uppercase tracking-wider">
               Current Streak
             </span>
-            <LuFlame className="h-4 w-4 text-amber-500" />
+            <Flame className="h-4 w-4 text-desert" />
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-amber-500">
-            {streak} <span className="text-xs font-normal text-muted-foreground">days in a row</span>
+          <p className="mt-2 text-2xl font-semibold font-mono text-foreground tabular-nums tracking-tight">
+            {streak} <span className="text-xs font-normal text-dim">days streak</span>
           </p>
-          <span className="text-[11px] text-muted-foreground">Consistent workout streak</span>
+          <span className="text-xs text-dim mt-1 block">Consecutive gym visits</span>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">
-              Home Facility
+            <span className="text-xs font-medium text-dim uppercase tracking-wider">
+              Facility Location
             </span>
-            <LuMapPin className="h-4 w-4 text-muted-foreground" />
+            <MapPin className="h-4 w-4 text-dim" />
           </div>
-          <p className="mt-2 text-sm font-bold text-foreground truncate">
+          <p className="mt-2 text-sm font-semibold text-foreground truncate">
             {profile.user.gym?.name}
           </p>
-          <span className="text-[11px] text-muted-foreground truncate block">
+          <span className="text-xs text-dim truncate block mt-0.5">
             {profile.user.gym?.address}
           </span>
         </div>
       </div>
 
       {/* Recent Attendance Log */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center justify-between border-b border-border pb-3">
-          <h3 className="text-sm font-bold text-foreground">Recent Check-In History</h3>
+      <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="flex items-center justify-between border-b border-border/50 pb-4">
+          <h3 className="text-sm font-semibold text-foreground">Recent Check-In History</h3>
           <Link
             href="/customer/attendance"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-medium text-dim hover:text-foreground transition-colors"
           >
-            <span>View all attendance</span>
-            <LuArrowRight className="h-3 w-3" />
+            <span>View all</span>
+            <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
 
-        <div className="mt-4 divide-y divide-border">
+        <div className="mt-4 divide-y divide-border/50">
           {attendances.length === 0 ? (
-            <p className="py-6 text-center text-xs text-muted-foreground">
+            <p className="py-8 text-center text-xs text-dim">
               No check-ins logged yet. Scan the reception QR code to log your first session!
             </p>
           ) : (
             attendances.slice(0, 5).map((a) => (
               <div
                 key={a.id}
-                className="flex items-center justify-between py-3 text-xs"
+                className="flex items-center justify-between py-3.5 text-xs"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                    <LuCalendarCheck className="h-4 w-4" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-honeydew text-[#204E2B]">
+                    <Calendar className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">
+                    <div className="font-medium text-foreground">
                       {format(new Date(a.checkInAt), "EEEE, dd MMMM yyyy")}
                     </div>
-                    <div className="text-[11px] text-muted-foreground">
+                    <div className="text-[11px] text-dim">
                       Checked in at {format(new Date(a.checkInAt), "hh:mm a")}
                     </div>
                   </div>
                 </div>
 
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-mono font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                <span className="rounded-full border border-border/70 bg-[#F5F5F3] px-2.5 py-0.5 text-[11px] font-mono text-dim tabular-nums">
                   {Number(a.distanceMeters).toFixed(0)}m from center
                 </span>
               </div>
@@ -263,4 +267,3 @@ export function CustomerOverview({ data }: CustomerOverviewProps) {
     </div>
   );
 }
-

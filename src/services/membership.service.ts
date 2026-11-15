@@ -11,14 +11,9 @@ export interface SubscriptionBuckets {
   expired: CustomerListItem[];
 }
 
-export async function getGymTrials(gymId: string): Promise<CustomerListItem[]> {
-  return customerRepo.listTrialsByGym(gymId);
-}
-
-export async function getGymSubscriptionsGrouped(
-  gymId: string
-): Promise<SubscriptionBuckets> {
-  const subscriptions = await customerRepo.listSubscriptionsByGym(gymId);
+export function groupSubscriptionsIntoBuckets(
+  subscriptions: CustomerListItem[]
+): SubscriptionBuckets {
   const now = new Date();
   const nowMs = now.getTime();
   const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -57,6 +52,30 @@ export async function getGymSubscriptionsGrouped(
   }
 
   return buckets;
+}
+
+export async function getGymTrials(gymId: string): Promise<CustomerListItem[]> {
+  return customerRepo.listTrialsByGym(gymId);
+}
+
+export async function getGymSubscriptionsGrouped(
+  gymId: string
+): Promise<SubscriptionBuckets> {
+  const subscriptions = await customerRepo.listSubscriptionsByGym(gymId);
+  return groupSubscriptionsIntoBuckets(subscriptions);
+}
+
+/**
+ * Consolidated 1-roundtrip queries for Trials and Subscriptions pages.
+ */
+export async function getTrialsPageData(gymId: string) {
+  return customerRepo.getTrialsPageData(gymId);
+}
+
+export async function getSubscriptionsPageData(gymId: string) {
+  const { subscriptions, plans } = await customerRepo.getSubscriptionsPageData(gymId);
+  const buckets = groupSubscriptionsIntoBuckets(subscriptions);
+  return { buckets, plans };
 }
 
 /**

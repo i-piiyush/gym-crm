@@ -1,8 +1,7 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { getPortalSession } from "@/lib/session";
-import { getGymTrials } from "@/services/membership.service";
-import { getActivePlans } from "@/db/repositories/customer.repo";
+import { getTrialsPageData } from "@/services/membership.service";
 import { TrialsTable } from "@/features/trials/components/TrialsTable";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +10,7 @@ export default async function AdminTrialsPage() {
   const session = await getPortalSession("ADMIN");
   const gymId = session.gymId!;
 
-  const [trials, plans] = await Promise.all([
-    getGymTrials(gymId),
-    getActivePlans(gymId),
-  ]);
+  const { trials, plans } = await getTrialsPageData(gymId);
 
   return (
     <FadeIn className="space-y-6">

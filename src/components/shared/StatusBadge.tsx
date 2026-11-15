@@ -14,22 +14,23 @@ export function StatusBadge({ status, className, label }: StatusBadgeProps) {
       case "ACTIVE":
       case "PAID":
       case "SENT":
-        return "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50";
+      case "VERIFIED":
+        return "bg-[#d0e1d4]/50 text-emerald-900 border-[rgba(40,40,40,0.06)]";
       case "TRIAL":
       case "PENDING":
       case "EXPIRING":
       case "INVITED":
       case "PENDING_OWNER":
-        return "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/50";
+        return "bg-[#e4be9e]/45 text-[#8c5222] border-[rgba(40,40,40,0.06)]";
       case "EXPIRED":
       case "FAILED":
       case "CANCELLED":
-        return "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/50";
+        return "bg-rose-50 text-rose-800 border-rose-200/80";
       case "INACTIVE":
       case "SUSPENDED":
       case "REVOKED":
       default:
-        return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
+        return "bg-[#d9d2b6]/35 text-[#71697a] border-[rgba(40,40,40,0.06)]";
     }
   };
 
@@ -38,7 +39,7 @@ export function StatusBadge({ status, className, label }: StatusBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold tracking-wide transition-colors",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-tight transition-colors",
         getStyle(),
         className
       )}
@@ -48,4 +49,3 @@ export function StatusBadge({ status, className, label }: StatusBadgeProps) {
     </span>
   );
 }
-

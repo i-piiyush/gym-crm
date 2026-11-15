@@ -6,12 +6,13 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { RecordPaymentDialog } from "@/features/payments/components/RecordPaymentDialog";
 import { format } from "date-fns";
 import {
-  LuSearch,
-  LuClock,
-  LuReceipt,
-  LuSparkles,
-  LuCalendar,
-} from "react-icons/lu";
+  Search,
+  Clock,
+  Receipt,
+  Sparkles,
+  Calendar,
+  CheckCircle2,
+} from "lucide-react";
 
 interface TrialsTableProps {
   trials: CustomerListItem[];
@@ -36,135 +37,139 @@ export function TrialsTable({ trials: initialTrials, plans }: TrialsTableProps) 
 
   return (
     <div className="space-y-6">
-      {/* Banner summary */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-            <LuSparkles className="h-6 w-6" />
+      {/* -------------------------------------------------------------------- */}
+      {/* TOP TRIALS SUMMARY BANNER */}
+      {/* -------------------------------------------------------------------- */}
+      <div className="apple-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e4be9e] text-[#242424] shadow-sm">
+            <Sparkles className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-foreground">Active Free Trials</h2>
-              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/40 dark:text-amber-300">
-                {trials.length} members on trial
+              <h2 className="text-base font-semibold text-[#242424]">
+                Free Trial Members & Leads
+              </h2>
+              <span className="rounded-full bg-[#e4be9e]/50 px-2.5 py-0.5 text-xs font-semibold text-[#8c5222]">
+                {trials.length} active trials
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Prospects testing the facility before purchasing a membership plan.
+            <p className="mt-0.5 text-xs text-[#71697a]">
+              Prospects testing the facility. Convert visitors into paid subscribers with sequential receipts.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Search Filter Toolbar */}
-      <div className="flex items-center gap-3">
+      {/* -------------------------------------------------------------------- */}
+      {/* SEARCH TOOLBAR */}
+      {/* -------------------------------------------------------------------- */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-sm">
-          <LuSearch className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#858585]" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search trials by customer or trainer..."
-            className="w-full rounded-lg border border-input bg-card pl-9 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+            placeholder="Search trials by customer or coach..."
+            className="w-full rounded-full border border-[rgba(40,40,40,0.08)] bg-white pl-9 pr-4 py-1.5 text-xs text-[#242424] placeholder:text-[#858585] focus:border-[#242424] focus:outline-none focus:ring-1 focus:ring-[#242424] shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors"
           />
         </div>
-        <span className="text-xs text-muted-foreground">
-          Showing {filtered.length} of {trials.length} active trials
+        <span className="text-xs text-[#71697a]">
+          Showing {filtered.length} of {trials.length} trials
         </span>
       </div>
 
-      {/* Trials Table */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      {/* -------------------------------------------------------------------- */}
+      {/* TRIALS TABLE */}
+      {/* -------------------------------------------------------------------- */}
+      <div className="apple-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-[rgba(40,40,40,0.06)] bg-[#FAFAF8] text-[11px] font-medium text-[#71697a]">
               <tr>
-                <th className="px-6 py-4">Customer</th>
-                <th className="px-6 py-4">Assigned Trainer</th>
-                <th className="px-6 py-4">Trial Expiration</th>
-                <th className="px-6 py-4">Days Left</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Action</th>
+                <th className="px-5 py-3.5">Trial Member</th>
+                <th className="px-5 py-3.5">Assigned Coach</th>
+                <th className="px-5 py-3.5">Trial Expiration</th>
+                <th className="px-5 py-3.5">Days Left</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[rgba(40,40,40,0.05)]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                    {search
-                      ? "No trials match your search query."
-                      : "No customers currently on free trial."}
+                  <td colSpan={6} className="px-6 py-12 text-center text-[#71697a]">
+                    {search ? "No trial members match your search." : "No active trial members currently."}
                   </td>
                 </tr>
               ) : (
                 filtered.map((t) => {
-                  let daysLeft = 0;
-                  let isUrgent = false;
-
+                  let daysRemaining = 0;
                   if (t.trialEndsAt) {
-                    const diffMs = new Date(t.trialEndsAt).getTime() - now;
-                    daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-                    isUrgent = daysLeft <= 2;
+                    const end = new Date(t.trialEndsAt).getTime();
+                    daysRemaining = Math.ceil((end - now) / 86400000);
                   }
 
+                  const initials = t.name
+                    ? t.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()
+                    : "M";
+
                   return (
-                    <tr
-                      key={t.id}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-foreground">{t.name}</div>
-                        <div className="text-xs text-muted-foreground">{t.email}</div>
-                        {t.phone && (
-                          <div className="text-[11px] font-mono text-muted-foreground">
-                            {t.phone}
+                    <tr key={t.id} className="hover:bg-stone-50/50 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#e4be9e]/50 text-xs font-semibold text-[#242424]">
+                            {initials}
                           </div>
-                        )}
+                          <div>
+                            <p className="font-semibold text-[#242424]">{t.name}</p>
+                            <p className="text-[11px] text-[#71697a]">{t.email}</p>
+                          </div>
+                        </div>
                       </td>
 
-                      <td className="px-6 py-4 text-xs font-medium text-foreground">
+                      <td className="px-5 py-3.5 text-[#71697a]">
                         {t.trainerName}
                       </td>
 
-                      <td className="px-6 py-4">
-                        {t.trialEndsAt ? (
-                          <div className="flex items-center gap-1.5 text-xs text-foreground">
-                            <LuCalendar className="h-3.5 w-3.5 text-muted-foreground" />
-                            <span>{format(new Date(t.trialEndsAt), "dd MMM yyyy")}</span>
-                          </div>
-                        ) : (
-                          "—"
-                        )}
+                      <td className="px-5 py-3.5 font-mono text-[11px] text-[#71697a]">
+                        {t.trialEndsAt
+                          ? format(new Date(t.trialEndsAt), "dd MMM yyyy")
+                          : "—"}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                            daysLeft <= 0
-                              ? "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-                              : isUrgent
-                              ? "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-                              : "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                            daysRemaining <= 1
+                              ? "bg-rose-50 text-rose-800"
+                              : daysRemaining <= 3
+                              ? "bg-[#e4be9e]/50 text-[#8c5222]"
+                              : "bg-[#d0e1d4]/50 text-emerald-900"
                           }`}
                         >
-                          <LuClock className="h-3 w-3" />
-                          <span>
-                            {daysLeft <= 0 ? "Ends today" : `${daysLeft} days left`}
-                          </span>
+                          {daysRemaining <= 0 ? "Ends Today" : `${daysRemaining} days left`}
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">
-                        <StatusBadge status="TRIAL" label="TRIAL" />
+                      <td className="px-5 py-3.5">
+                        <StatusBadge status="TRIAL" label="Free Trial" />
                       </td>
 
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-5 py-3.5 text-right">
                         <button
+                          type="button"
                           onClick={() => setConvertingCustomer(t)}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+                          className="apple-button-press inline-flex items-center gap-1.5 rounded-full bg-[#242424] px-3.5 py-1 text-xs font-medium text-white shadow-sm hover:bg-[#383838]"
                         >
-                          <LuReceipt className="h-3.5 w-3.5" />
-                          <span>Convert to Member</span>
+                          <Receipt className="h-3 w-3" />
+                          <span>Convert to Paid</span>
                         </button>
                       </td>
                     </tr>
@@ -176,7 +181,7 @@ export function TrialsTable({ trials: initialTrials, plans }: TrialsTableProps) 
         </div>
       </div>
 
-      {/* Convert to Member / Record Payment Dialog */}
+      {/* Convert to Paid Dialog */}
       {convertingCustomer && (
         <RecordPaymentDialog
           isOpen={true}
@@ -191,11 +196,10 @@ export function TrialsTable({ trials: initialTrials, plans }: TrialsTableProps) 
           ]}
           plans={plans}
           onPaymentSuccess={() => {
-            window.location.reload();
+            setConvertingCustomer(null);
           }}
         />
       )}
     </div>
   );
 }
-

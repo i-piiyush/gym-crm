@@ -8,7 +8,10 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPeoplePage() {
   const session = await getPortalSession("ADMIN");
-  const data = await getPeoplePageData(session.gymId!);
+  const data = await getPeoplePageData(session.gymId!, {
+    maxCustomers: session.maxCustomers ?? 50,
+    name: session.gymName ?? "Gym",
+  });
 
   return (
     <FadeIn className="space-y-6">

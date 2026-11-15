@@ -14,8 +14,8 @@ export default async function AdminLayout({
   const session = await getPortalSession("ADMIN");
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar role="ADMIN" gymName={session.gymName} />
+    <div className="flex min-h-screen bg-[#FAFAF8]">
+      <Sidebar role="ADMIN" gymName={session.gymName} userName={session.name} />
       <div className="flex flex-1 flex-col pb-16 lg:pb-0">
         <Topbar role="ADMIN" gymName={session.gymName} userName={session.name} />
         <main className="flex-1 p-4 lg:p-8 max-w-7xl mx-auto w-full">{children}</main>

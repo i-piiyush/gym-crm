@@ -65,24 +65,32 @@ export async function getAdminDashboardStats(
   const sevenDaysFromNow = addDays(now, 7);
   const twoDaysFromNow = addDays(now, 2);
 
-  // ---------- Single SQL query using CTEs for all dashboard aggregates ----------
-  // Start the aggregates and the two attention lists together. These calls are
-  // independent, and serializing them adds another full DB round-trip to the
-  // dashboard's critical path (especially noticeable with a remote DB).
-  const [statsRows, overdueMembers, trialsEndingSoon] = await Promise.all([
-    prisma.$queryRaw<
-      Array<{
-        active_customers: bigint;
-        pending_invites: bigint;
-        trainers_count: bigint;
-        present_today: bigint;
-        monthly_revenue: Prisma.Decimal | null;
-        expiring_7d: bigint;
-        overdue_count: bigint;
-        pending_salary_count: bigint;
-        pending_salary_total: Prisma.Decimal | null;
-      }>
-    >`
+  // ---------- Single SQL query using CTEs for ALL dashboard data (1 round-trip) ----------
+  const statsRows = await prisma.$queryRaw<
+    Array<{
+      active_customers: bigint;
+      pending_invites: bigint;
+      trainers_count: bigint;
+      present_today: bigint;
+      monthly_revenue: Prisma.Decimal | null;
+      expiring_7d: bigint;
+      overdue_count: bigint;
+      pending_salary_count: bigint;
+      pending_salary_total: Prisma.Decimal | null;
+      overdue_members: Array<{
+        id: string;
+        name: string;
+        email: string;
+        membershipEnd: string | null;
+      }>;
+      trials_ending_soon: Array<{
+        id: string;
+        name: string;
+        email: string;
+        trialEndsAt: string | null;
+      }>;
+    }>
+  >`
     SELECT
       (SELECT COUNT(*)
          FROM "CustomerProfile" cp
@@ -134,23 +142,27 @@ export async function getAdminDashboardStats(
       (SELECT COALESCE(SUM(amount), 0)
          FROM "SalaryRecord"
         WHERE "gymId" = ${gymId} AND month = ${currentMonthStr} AND status = 'PENDING'
-      ) AS pending_salary_total
-    `,
-    prisma.customerProfile.findMany({
-      where: { user: { gymId }, status: "EXPIRED" },
-      include: { user: { select: { id: true, name: true, email: true } } },
-      take: 5,
-    }),
-    prisma.customerProfile.findMany({
-      where: {
-        user: { gymId },
-        status: "TRIAL",
-        trialEndsAt: { gte: now, lte: twoDaysFromNow },
-      },
-      include: { user: { select: { id: true, name: true, email: true } } },
-      take: 5,
-    }),
-  ]);
+      ) AS pending_salary_total,
+
+      (SELECT COALESCE(json_agg(t), '[]'::json) FROM (
+         SELECT cp."userId" AS id, u.name, u.email, cp."membershipEnd"
+         FROM "CustomerProfile" cp
+         JOIN "User" u ON u.id = cp."userId"
+         WHERE u."gymId" = ${gymId} AND cp.status = 'EXPIRED'
+         LIMIT 5
+      ) t) AS overdue_members,
+
+      (SELECT COALESCE(json_agg(t), '[]'::json) FROM (
+         SELECT cp."userId" AS id, u.name, u.email, cp."trialEndsAt"
+         FROM "CustomerProfile" cp
+         JOIN "User" u ON u.id = cp."userId"
+         WHERE u."gymId" = ${gymId} 
+           AND cp.status = 'TRIAL' 
+           AND cp."trialEndsAt" >= ${now} 
+           AND cp."trialEndsAt" <= ${twoDaysFromNow}
+         LIMIT 5
+      ) t) AS trials_ending_soon
+  `;
 
   const s = statsRows[0]!;
   const activeCustomersCount = Number(s.active_customers);
@@ -161,6 +173,25 @@ export async function getAdminDashboardStats(
     Math.round((totalCustomerLoad / gym.maxCustomers) * 100)
   );
 
+  const overdueMembersList = (s.overdue_members || []).map((m) => ({
+    id: m.id,
+    name: m.name,
+    email: m.email,
+    membershipEnd: m.membershipEnd ? new Date(m.membershipEnd) : null,
+  }));
+
+  const trialsEndingSoonList = (s.trials_ending_soon || []).map((t) => {
+    const trialDate = t.trialEndsAt ? new Date(t.trialEndsAt) : null;
+    const msLeft = trialDate ? trialDate.getTime() - now.getTime() : 0;
+    const daysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+    return {
+      id: t.id,
+      name: t.name,
+      email: t.email,
+      trialEndsAt: trialDate,
+      daysLeft,
+    };
+  });
   return {
     customers: {
       active: activeCustomersCount,
@@ -175,23 +206,8 @@ export async function getAdminDashboardStats(
     feesOverdueCount: Number(s.overdue_count),
     expiringIn7DaysCount: Number(s.expiring_7d),
     needsAttention: {
-      trialsEndingSoon: trialsEndingSoon.map((t) => {
-        const msLeft = t.trialEndsAt ? t.trialEndsAt.getTime() - now.getTime() : 0;
-        const daysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
-        return {
-          id: t.userId,
-          name: t.user.name,
-          email: t.user.email,
-          trialEndsAt: t.trialEndsAt,
-          daysLeft,
-        };
-      }),
-      overdueMembers: overdueMembers.map((c) => ({
-        id: c.userId,
-        name: c.user.name,
-        email: c.user.email,
-        membershipEnd: c.membershipEnd,
-      })),
+      trialsEndingSoon: trialsEndingSoonList,
+      overdueMembers: overdueMembersList,
       pendingSalaries: {
         count: Number(s.pending_salary_count),
         totalAmount: Number(s.pending_salary_total ?? 0),

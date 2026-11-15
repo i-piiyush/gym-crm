@@ -76,49 +76,66 @@ export async function deleteTrainer(trainerId: string) {
 }
 
 /**
- * Fetches assigned customers for a trainer with their check-in status for today.
+ * Optimized 1-roundtrip query for fetching assigned customers for a trainer.
+ * Uses a single fast SQL join with subquery for today's check-in timestamp.
  */
 export async function getTrainerAssignedCustomers(
   trainerId: string,
   todayDateStr: string
 ) {
-  const customers = await prisma.customerProfile.findMany({
-    where: { trainerId },
-    include: {
-      user: {
-        include: {
-          attendances: {
-            where: { date: todayDateStr },
-            take: 1,
-          },
-        },
-      },
-      plan: true,
-    },
-    orderBy: {
-      user: {
-        name: "asc",
-      },
-    },
-  });
+  const rows = await prisma.$queryRaw<
+    Array<{
+      id: string;
+      name: string;
+      email: string;
+      phone: string | null;
+      status: any;
+      planName: string;
+      membershipStart: string | Date | null;
+      membershipEnd: string | Date | null;
+      trialEndsAt: string | Date | null;
+      checkInTime: string | Date | null;
+      checkedInToday: boolean;
+    }>
+  >`
+    SELECT 
+      u."id",
+      u."name",
+      u."email",
+      u."phone",
+      cp."status",
+      COALESCE(mp."name", CASE WHEN cp."status" = 'TRIAL' THEN 'Free Trial' ELSE 'Custom' END) AS "planName",
+      cp."membershipStart",
+      cp."membershipEnd",
+      cp."trialEndsAt",
+      att."checkInAt" AS "checkInTime",
+      (att."checkInAt" IS NOT NULL) AS "checkedInToday"
+    FROM "CustomerProfile" cp
+    JOIN "User" u ON u."id" = cp."userId"
+    LEFT JOIN "MembershipPlan" mp ON mp."id" = cp."planId"
+    LEFT JOIN "Attendance" att ON att."userId" = u."id" AND att."date" = ${todayDateStr}
+    WHERE cp."trainerId" = ${trainerId}
+    ORDER BY u."name" ASC;
+  `;
 
-  return customers.map((c) => ({
-    id: c.userId,
-    name: c.user.name,
-    email: c.user.email,
-    phone: c.user.phone,
+  return rows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    phone: c.phone,
     status: c.status,
-    planName: c.plan?.name || (c.status === "TRIAL" ? "Free Trial" : "Custom"),
-    membershipStart: c.membershipStart,
-    membershipEnd: c.membershipEnd,
-    trialEndsAt: c.trialEndsAt,
-    checkedInToday: c.user.attendances.length > 0,
-    checkInTime: c.user.attendances[0]?.checkInAt || null,
+    planName: c.planName,
+    membershipStart: c.membershipStart ? new Date(c.membershipStart) : null,
+    membershipEnd: c.membershipEnd ? new Date(c.membershipEnd) : null,
+    trialEndsAt: c.trialEndsAt ? new Date(c.trialEndsAt) : null,
+    checkedInToday: Boolean(c.checkedInToday),
+    checkInTime: c.checkInTime ? new Date(c.checkInTime) : null,
   }));
 }
 
 /**
- * Fetches dashboard overview statistics for a trainer.
+ * Consolidated 1-roundtrip query for Trainer Portal Overview.
+ * Gathers profile, client totals, today's attendance check, shift history, and salary in 1 single roundtrip.
  */
 export async function getTrainerPortalOverview(
   trainerId: string,
@@ -126,73 +143,123 @@ export async function getTrainerPortalOverview(
   todayDateStr: string,
   currentMonthStr: string
 ) {
-  const [trainerProfile, customers, personalAttendances, currentSalary] =
-    await Promise.all([
-      prisma.trainerProfile.findUnique({
-        where: { userId: trainerId },
-        include: { user: true },
-      }),
-      prisma.customerProfile.findMany({
-        where: { trainerId },
-        include: {
-          user: {
-            include: {
-              attendances: {
-                where: { date: todayDateStr },
-              },
-            },
-          },
-        },
-      }),
-      prisma.attendance.findMany({
-        where: { userId: trainerId },
-        orderBy: { checkInAt: "desc" },
-        take: 30,
-      }),
-      prisma.salaryRecord.findUnique({
-        where: {
-          trainerId_month: {
-            trainerId,
-            month: currentMonthStr,
-          },
-        },
-      }),
-    ]);
+  const rows = await prisma.$queryRaw<
+    Array<{
+      trainerProfile: {
+        userId: string;
+        monthlySalary: number;
+        salaryDueDay: number;
+        joinedAt: string | Date;
+        user: {
+          name: string;
+          email: string;
+        };
+      } | null;
+      totalAssignedClients: number;
+      clientsCheckedInToday: number;
+      recentAttendances: Array<{
+        id: string;
+        date: string;
+        checkInAt: string | Date;
+        distanceMeters: number;
+      }>;
+      currentSalary: {
+        amount: number;
+        status: string;
+        paidAt: string | Date | null;
+      } | null;
+      checkedInToday: boolean;
+    }>
+  >`
+    SELECT
+      (
+        SELECT row_to_json(tp_row)
+        FROM (
+          SELECT 
+            tp."userId",
+            tp."monthlySalary"::double precision AS "monthlySalary",
+            tp."salaryDueDay",
+            tp."joinedAt",
+            json_build_object('name', u."name", 'email', u."email") AS "user"
+          FROM "TrainerProfile" tp
+          JOIN "User" u ON u."id" = tp."userId"
+          WHERE tp."userId" = ${trainerId}
+        ) tp_row
+      ) AS "trainerProfile",
+      (
+        SELECT COUNT(*)::int
+        FROM "CustomerProfile"
+        WHERE "trainerId" = ${trainerId}
+      ) AS "totalAssignedClients",
+      (
+        SELECT COUNT(DISTINCT cp."userId")::int
+        FROM "CustomerProfile" cp
+        JOIN "Attendance" a ON a."userId" = cp."userId" AND a."date" = ${todayDateStr}
+        WHERE cp."trainerId" = ${trainerId}
+      ) AS "clientsCheckedInToday",
+      (
+        SELECT COALESCE(json_agg(att_row), '[]'::json)
+        FROM (
+          SELECT 
+            "id",
+            "date",
+            "checkInAt",
+            "distanceMeters"::double precision AS "distanceMeters"
+          FROM "Attendance"
+          WHERE "userId" = ${trainerId}
+          ORDER BY "checkInAt" DESC
+          LIMIT 5
+        ) att_row
+      ) AS "recentAttendances",
+      (
+        SELECT row_to_json(sr_row)
+        FROM (
+          SELECT 
+            "amount"::double precision AS "amount",
+            "status",
+            "paidAt"
+          FROM "SalaryRecord"
+          WHERE "trainerId" = ${trainerId} AND "month" = ${currentMonthStr}
+        ) sr_row
+      ) AS "currentSalary",
+      EXISTS(
+        SELECT 1 FROM "Attendance"
+        WHERE "userId" = ${trainerId} AND "date" = ${todayDateStr}
+      ) AS "checkedInToday";
+  `;
 
-  const clientsCheckedInToday = customers.filter(
-    (c) => c.user.attendances.length > 0
-  ).length;
-
-  const checkedInToday = personalAttendances.some((a) => a.date === todayDateStr);
-
-  const serializedProfile = trainerProfile
-    ? {
-        ...trainerProfile,
-        monthlySalary: Number(trainerProfile.monthlySalary),
-      }
-    : null;
-
-  const serializedAttendances = personalAttendances.map((a) => ({
-    ...a,
-    latitude: Number(a.latitude),
-    longitude: Number(a.longitude),
-    accuracyMeters: Number(a.accuracyMeters),
-    distanceMeters: Number(a.distanceMeters),
-  }));
+  const data = rows[0];
+  if (!data?.trainerProfile) {
+    return {
+      trainerProfile: null,
+      totalAssignedClients: 0,
+      clientsCheckedInToday: 0,
+      checkedInToday: false,
+      recentAttendances: [],
+      currentSalary: null,
+    };
+  }
 
   return {
-    trainerProfile: serializedProfile,
-    totalAssignedClients: customers.length,
-    clientsCheckedInToday,
-    checkedInToday,
-    recentAttendances: serializedAttendances.slice(0, 5),
-    currentSalary: currentSalary
+    trainerProfile: {
+      ...data.trainerProfile,
+      monthlySalary: Number(data.trainerProfile.monthlySalary),
+      joinedAt: new Date(data.trainerProfile.joinedAt),
+    },
+    totalAssignedClients: Number(data.totalAssignedClients || 0),
+    clientsCheckedInToday: Number(data.clientsCheckedInToday || 0),
+    checkedInToday: Boolean(data.checkedInToday),
+    recentAttendances: (data.recentAttendances || []).map((a) => ({
+      ...a,
+      checkInAt: new Date(a.checkInAt),
+      distanceMeters: Number(a.distanceMeters),
+    })),
+    currentSalary: data.currentSalary
       ? {
-          amount: Number(currentSalary.amount),
-          status: currentSalary.status,
-          paidAt: currentSalary.paidAt,
+          amount: Number(data.currentSalary.amount),
+          status: data.currentSalary.status,
+          paidAt: data.currentSalary.paidAt ? new Date(data.currentSalary.paidAt) : null,
         }
       : null,
   };
 }
-

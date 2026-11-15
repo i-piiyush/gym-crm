@@ -17,64 +17,77 @@ const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isTrainerRoute = createRouteMatcher(["/trainer(.*)"]);
 const isCustomerRoute = createRouteMatcher(["/customer(.*)"]);
 
-export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims, redirectToSignIn } = await auth();
+export default clerkMiddleware(
+  async (auth, req) => {
+    const { userId, sessionClaims, redirectToSignIn } = await auth();
 
-  // Allow public routes immediately
-  if (isPublicRoute(req)) {
+    const isHome = req.nextUrl.pathname === "/";
+    const isPreview = req.nextUrl.searchParams.get("preview") === "true";
+
+    // 1. If user is logged in and visits root "/" (without ?preview=true), redirect to their respective role dashboard
+    if (userId && isHome && !isPreview) {
+      const metadata =
+        (sessionClaims?.publicMetadata as ClerkPublicMetadata) ||
+        ((sessionClaims as Record<string, unknown>)?.metadata as ClerkPublicMetadata) ||
+        {};
+      const role = metadata.role;
+
+      if (role && ROLE_HOME_ROUTES[role]) {
+        return NextResponse.redirect(new URL(ROLE_HOME_ROUTES[role], req.url));
+      }
+
+      // If role is not yet in JWT claims, let request pass through to src/app/page.tsx
+      // which queries the DB via syncUserFromClerk and redirects appropriately
+      return NextResponse.next();
+    }
+
+    // 2. Allow public routes immediately
+    if (isPublicRoute(req)) {
+      return NextResponse.next();
+    }
+
+    // 3. Not logged in -> redirect to Clerk sign-in
+    if (!userId) {
+      return redirectToSignIn({ returnBackUrl: req.url });
+    }
+
+    const metadata =
+      (sessionClaims?.publicMetadata as ClerkPublicMetadata) ||
+      ((sessionClaims as Record<string, unknown>)?.metadata as ClerkPublicMetadata) ||
+      {};
+    const role = metadata.role;
+
+    // 4. Fast middleware role protection if role is present in session claims
+    if (role) {
+      if (isSuperAdminRoute(req) && role !== "SUPER_ADMIN") {
+        const redirectTarget = ROLE_HOME_ROUTES[role] || "/not-invited";
+        return NextResponse.redirect(new URL(redirectTarget, req.url));
+      }
+
+      if (isAdminRoute(req) && role !== "ADMIN") {
+        const redirectTarget = ROLE_HOME_ROUTES[role] || "/not-invited";
+        return NextResponse.redirect(new URL(redirectTarget, req.url));
+      }
+
+      if (isTrainerRoute(req) && role !== "TRAINER") {
+        const redirectTarget = ROLE_HOME_ROUTES[role] || "/not-invited";
+        return NextResponse.redirect(new URL(redirectTarget, req.url));
+      }
+
+      if (isCustomerRoute(req) && role !== "CUSTOMER") {
+        const redirectTarget = ROLE_HOME_ROUTES[role] || "/not-invited";
+        return NextResponse.redirect(new URL(redirectTarget, req.url));
+      }
+    }
+
+    // If role is not yet in token, let request through to the portal layout
+    // where getPortalSession() verifies against the database (the source of truth)
     return NextResponse.next();
+  },
+  {
+    clockSkewInMs: 60000,
   }
-
-  // Not logged in -> redirect to Clerk sign-in
-  if (!userId) {
-    return redirectToSignIn({ returnBackUrl: req.url });
-  }
-
-  const metadata =
-    (sessionClaims?.publicMetadata as ClerkPublicMetadata) ||
-    ((sessionClaims as Record<string, unknown>)?.metadata as ClerkPublicMetadata) ||
-    {};
-  const role = metadata.role;
-
-  // Root or landing page: redirect to role dashboard if role is known in token
-  if (req.nextUrl.pathname === "/") {
-    if (role && ROLE_HOME_ROUTES[role]) {
-      return NextResponse.redirect(new URL(ROLE_HOME_ROUTES[role], req.url));
-    }
-    // If role is not yet in JWT claims, let request pass through to src/app/page.tsx
-    // which queries the DB via syncUserFromClerk and redirects appropriately
-    return NextResponse.next();
-  }
-
-  // Fast middleware role protection if role is present in session claims
-  if (role) {
-    if (isSuperAdminRoute(req) && role !== "SUPER_ADMIN") {
-      const redirectTarget = ROLE_HOME_ROUTES[role] || "/not-invited";
-      return NextResponse.redirect(new URL(redirectTarget, req.url));
-    }
-
-    if (isAdminRoute(req) && role !== "ADMIN") {
-      const redirectTarget = ROLE_HOME_ROUTES[role] || "/not-invited";
-      return NextResponse.redirect(new URL(redirectTarget, req.url));
-    }
-
-    if (isTrainerRoute(req) && role !== "TRAINER") {
-      const redirectTarget = ROLE_HOME_ROUTES[role] || "/not-invited";
-      return NextResponse.redirect(new URL(redirectTarget, req.url));
-    }
-
-    if (isCustomerRoute(req) && role !== "CUSTOMER") {
-      const redirectTarget = ROLE_HOME_ROUTES[role] || "/not-invited";
-      return NextResponse.redirect(new URL(redirectTarget, req.url));
-    }
-  }
-
-  // If role is not yet in token, let request through to the portal layout
-  // where getPortalSession() verifies against the database (the source of truth)
-  return NextResponse.next();
-}, {
-  clockSkewInMs: 60000,
-});
+);
 
 export const config = {
   matcher: [
@@ -84,4 +97,3 @@ export const config = {
     "/(api|trpc)(.*)",
   ],
 };
-

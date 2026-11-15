@@ -1,22 +1,16 @@
-function Skeleton({ className }: { className: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`animate-pulse rounded-md bg-muted motion-reduce:animate-none ${className}`}
-    />
-  );
-}
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function AdminLoading() {
+export default function AdminDashboardLoading() {
   return (
     <div
       role="status"
-      aria-label="Loading admin page"
+      aria-label="Loading dashboard"
       aria-busy="true"
       className="space-y-6"
     >
-      <span className="sr-only">Loading admin page</span>
+      <span className="sr-only">Loading dashboard</span>
 
+      {/* Header Skeleton */}
       <div
         aria-hidden="true"
         className="space-y-2 pb-6 sm:flex sm:items-center sm:justify-between sm:space-y-0"
@@ -28,6 +22,7 @@ export default function AdminLoading() {
         <Skeleton className="h-10 w-44" />
       </div>
 
+      {/* Metrics Row (6 Cards) */}
       <div
         aria-hidden="true"
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
@@ -47,6 +42,7 @@ export default function AdminLoading() {
         ))}
       </div>
 
+      {/* Quick Action Badges */}
       <div
         aria-hidden="true"
         className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
@@ -65,6 +61,7 @@ export default function AdminLoading() {
         ))}
       </div>
 
+      {/* Table / Attention items preview */}
       <div
         aria-hidden="true"
         className="space-y-5 rounded-2xl border border-border bg-card p-6 shadow-sm"

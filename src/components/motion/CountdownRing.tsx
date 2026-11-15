@@ -23,6 +23,13 @@ export function CountdownRing({
   const progress = Math.max(0, Math.min(1, secondsRemaining / totalSeconds));
   const strokeDashoffset = circumference * (1 - progress);
 
+  const formattedTime =
+    totalSeconds >= 60
+      ? `${Math.floor(secondsRemaining / 60)}:${String(
+          Math.floor(secondsRemaining % 60)
+        ).padStart(2, "0")}`
+      : `${Math.ceil(secondsRemaining)}s`;
+
   return (
     <div
       className={`relative inline-flex items-center justify-center ${className || ""}`}
@@ -37,7 +44,7 @@ export function CountdownRing({
           stroke="currentColor"
           strokeWidth={strokeWidth}
           fill="none"
-          className="text-slate-200 dark:text-slate-800"
+          className="text-stone-200 dark:text-stone-800"
         />
         {/* Animated progress ring */}
         <motion.circle
@@ -48,7 +55,7 @@ export function CountdownRing({
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
-          className="text-primary"
+          className="text-foreground"
           style={{
             strokeDasharray: circumference,
           }}
@@ -61,10 +68,13 @@ export function CountdownRing({
           }}
         />
       </svg>
-      <span className="absolute text-xs font-semibold tabular-nums text-foreground">
-        {Math.ceil(secondsRemaining)}s
+      <span
+        className={`absolute font-semibold tabular-nums text-foreground ${
+          totalSeconds >= 60 ? "text-[11px]" : "text-xs"
+        }`}
+      >
+        {formattedTime}
       </span>
     </div>
   );
 }
-

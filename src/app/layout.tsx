@@ -4,8 +4,8 @@ import { Toaster } from "sonner";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Gym CRM - Multi-Tenant Operations Platform",
-  description: "High-performance gym operations, GPS attendance, memberships, and billing.",
+  title: "GYM-OS — Your gym. In perfect sync.",
+  description: "The premium operating system for modern gyms. Manage members, track attendance, handle billing, and monitor performance in one beautifully simple workspace.",
 };
 
 export default function RootLayout({
