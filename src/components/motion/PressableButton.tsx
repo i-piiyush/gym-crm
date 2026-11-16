@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import type { HTMLMotionProps } from "motion/react";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 interface PressableButtonProps extends HTMLMotionProps<"button"> {
   children: ReactNode;
@@ -22,16 +23,6 @@ export function PressableButton({
 }: PressableButtonProps) {
   const shouldReduceMotion = useReducedMotion();
 
-  const variantStyles = {
-    primary: "bg-primary text-primary-foreground hover:bg-primary/85",
-    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-    outline:
-      "border border-border bg-transparent hover:bg-secondary text-foreground",
-    ghost: "bg-transparent hover:bg-secondary text-foreground",
-    destructive:
-      "bg-destructive text-destructive-foreground hover:bg-rose-700 shadow-sm",
-  };
-
   const sizeStyles = {
     sm: "h-8 px-3 text-xs rounded-md",
     md: "h-10 px-4 text-sm rounded-lg",
@@ -44,8 +35,7 @@ export function PressableButton({
       transition={{ duration: 0.15, ease: "easeOut" }}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-        variantStyles[variant],
+        buttonVariants({ variant: variant === "primary" ? "default" : variant }),
         sizeStyles[size],
         className,
       )}

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function TrainerPortalPage() {
   const session = await getPortalSession("TRAINER");
   const now = new Date();
-  const zonedNow = toZonedTime(now, "Asia/Kolkata");
+  const zonedNow = toZonedTime(now, session.timezone ?? "Asia/Kolkata");
   const todayDateStr = format(zonedNow, "yyyy-MM-dd");
   const currentMonthStr = format(zonedNow, "yyyy-MM");
 

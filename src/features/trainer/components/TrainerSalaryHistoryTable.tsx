@@ -90,7 +90,10 @@ export function TrainerSalaryHistoryTable({
             <TableHeader className="border-b border-border bg-muted/40 text-xs font-semibold tracking-wide text-muted-foreground ">
               <TableRow>
                 <TableHead className="px-6 py-4">Payroll Month</TableHead>
-                <TableHead className="px-6 py-4">Monthly Salary</TableHead>
+                <TableHead className="px-6 py-4">Base Salary</TableHead>
+                <TableHead className="px-6 py-4">Missed Days / Rate</TableHead>
+                <TableHead className="px-6 py-4">Deduction</TableHead>
+                <TableHead className="px-6 py-4">Payable Salary</TableHead>
                 <TableHead className="px-6 py-4">Due Day</TableHead>
                 <TableHead className="px-6 py-4">Status</TableHead>
                 <TableHead className="px-6 py-4 text-right">
@@ -102,7 +105,7 @@ export function TrainerSalaryHistoryTable({
               {records.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={8}
                     className="px-6 py-12 text-center text-muted-foreground text-xs"
                   >
                     No payroll statements recorded yet.
@@ -118,6 +121,9 @@ export function TrainerSalaryHistoryTable({
                       {r.month}
                     </TableCell>
 
+                    <TableCell className="px-6 py-4 font-mono text-sm text-foreground">₹{r.baseAmount.toLocaleString("en-IN")}</TableCell>
+                    <TableCell className="px-6 py-4 text-xs text-foreground">{r.holidayDays} day(s)<p className="text-muted-foreground">₹{r.holidayDeductionPerDay.toLocaleString("en-IN")} / day</p></TableCell>
+                    <TableCell className="px-6 py-4 font-mono text-sm text-foreground">−₹{r.deductionAmount.toLocaleString("en-IN")}</TableCell>
                     <TableCell className="px-6 py-4">
                       <span className="font-mono text-sm font-semibold text-foreground">
                         ₹{r.amount.toLocaleString("en-IN")}
@@ -159,6 +165,7 @@ export function TrainerSalaryHistoryTable({
           </Table>
         </div>
       </div>
+      <p className="text-xs text-muted-foreground">Pending statements update for completed days without a check-in, including weekends. Paid leave, today, and future days are excluded. Paid statements keep their recorded calculation.</p>
     </div>
   );
 }

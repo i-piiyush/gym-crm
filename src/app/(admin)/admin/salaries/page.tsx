@@ -6,6 +6,7 @@ import {
   getCurrentMonthString,
 } from "@/services/salary.service";
 import { SalariesTable } from "@/features/salaries/components/SalariesTable";
+import { monthStringSchema } from "@/schemas/salary.schema";
 
 export const dynamic = "force-dynamic";
 
@@ -19,8 +20,9 @@ export default async function AdminSalariesPage({
   const session = await getPortalSession("ADMIN");
   const { month } = await searchParams;
 
-  const currentMonth = getCurrentMonthString();
-  const targetMonth = month || currentMonth;
+  const currentMonth = getCurrentMonthString(new Date(), session.timezone);
+  const parsedMonth = monthStringSchema.safeParse(month);
+  const targetMonth = parsedMonth.success ? parsedMonth.data : currentMonth;
 
   const overview = await getSalariesForGymAndMonth(session.gymId!, targetMonth);
 
@@ -28,7 +30,7 @@ export default async function AdminSalariesPage({
     <FadeIn className="space-y-6">
       <PageHeader
         title="Trainer Salaries & Payroll"
-        description="Snapshot monthly salaries, track due disbursement dates, and record payroll payments."
+        description="Review base salaries, automatic attendance deductions, and payable amounts before recording payroll payments."
       />
 
       <SalariesTable

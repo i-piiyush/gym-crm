@@ -214,8 +214,9 @@ export function GymsTable({ gyms: initialGyms }: GymsTableProps) {
                           </div>
                           <div className="flex items-center gap-2 pt-0.5">
                             <Button
+                              variant="link"
                               onClick={() => handleResendInvite(gym)}
-                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary hover:underline"
                             >
                               <LuMailCheck className="h-3 w-3" />
                               <span>Resend</span>
@@ -224,10 +225,11 @@ export function GymsTable({ gyms: initialGyms }: GymsTableProps) {
                               ·
                             </span>
                             <Button
+                              variant="link"
                               onClick={() =>
                                 setPendingAction({ type: "REVOKE_INVITE", gym })
                               }
-                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-status-danger-fg hover:underline"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-status-danger-fg hover:text-status-danger-fg hover:underline"
                             >
                               <LuUserX className="h-3 w-3" />
                               <span>Revoke</span>
@@ -256,13 +258,14 @@ export function GymsTable({ gyms: initialGyms }: GymsTableProps) {
                         </Link>
 
                         <Button
+                          variant="outline"
                           onClick={() =>
                             setPendingAction({ type: "TOGGLE_STATUS", gym })
                           }
                           className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border transition-colors ${
                             gym.status === "ACTIVE"
-                              ? "text-status-danger-fg hover:bg-status-danger-bg "
-                              : "text-emerald-600 hover:bg-status-active-bg "
+                              ? "text-status-danger-fg hover:bg-status-danger-bg hover:text-status-danger-fg"
+                              : "text-status-active-fg hover:bg-status-active-bg hover:text-status-active-fg"
                           }`}
                           title={
                             gym.status === "ACTIVE"

@@ -37,6 +37,8 @@ interface TrainerOverviewProps {
     }>;
     currentSalary: {
       amount: number;
+      deductionAmount: number;
+      holidayDays: number;
       status: string;
       paidAt: Date | null;
     } | null;
@@ -151,7 +153,7 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-dim tracking-wide">
-              Monthly Salary
+              Monthly Payable Salary
             </span>
             <Banknote className="h-4 w-4 text-dim" />
           </div>
@@ -163,6 +165,7 @@ export function TrainerOverview({ data, todayDateStr }: TrainerOverviewProps) {
                   "en-IN",
                 )}
           </p>
+          {currentSalary && <p className="mt-1 text-xs text-dim">₹{currentSalary.deductionAmount.toLocaleString("en-IN")} deduction · {currentSalary.holidayDays} missed day(s)</p>}
           <div className="mt-2 flex items-center justify-between text-xs">
             <span className="text-dim">
               Day {trainerProfile?.salaryDueDay || 1}

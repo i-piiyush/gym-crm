@@ -1,13 +1,15 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { getPortalSession } from "@/lib/session";
-import { listTrainerSalaryHistory } from "@/db/repositories/salary.repo";
+import { ensureSalaryRecordsForMonth, listTrainerSalaryHistory } from "@/db/repositories/salary.repo";
+import { getCurrentMonthString } from "@/services/salary.service";
 import { TrainerSalaryHistoryTable } from "@/features/trainer/components/TrainerSalaryHistoryTable";
 
 export const dynamic = "force-dynamic";
 
 export default async function TrainerSalaryPage() {
   const session = await getPortalSession("TRAINER");
+  await ensureSalaryRecordsForMonth(session.gymId!, getCurrentMonthString(new Date(), session.timezone));
   const records = await listTrainerSalaryHistory(session.userId);
 
   return (

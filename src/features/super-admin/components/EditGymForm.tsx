@@ -1,10 +1,11 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateGymSchema, UpdateGymInput } from "@/schemas/gym.schema";
 import { updateGymAction } from "@/actions/gym.actions";
@@ -43,6 +44,7 @@ export function EditGymForm({ gym }: EditGymFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     watch,
     formState: { errors },
@@ -200,18 +202,28 @@ export function EditGymForm({ gym }: EditGymFormProps) {
           >
             Operational Status
           </label>
-          <select
-            aria-invalid={!!errors.status}
-            aria-describedby={
-              errors.status ? "register-status-error" : undefined
-            }
-            id="register-status"
-            {...register("status")}
-            className="w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="SUSPENDED">SUSPENDED</option>
-          </select>
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <Combobox
+                name={field.name}
+                ref={field.ref}
+                onBlur={field.onBlur}
+                value={field.value || ""}
+                onValueChange={field.onChange}
+                id="register-status"
+                disabled={isSubmitting}
+                aria-invalid={!!errors.status}
+                aria-describedby={errors.status ? "register-status-error" : undefined}
+                options={[
+                  { value: "ACTIVE", label: "Active" },
+                  { value: "SUSPENDED", label: "Suspended" },
+                ]}
+                searchPlaceholder="Search gym statuses…"
+              />
+            )}
+          />
           {errors.status && (
             <p
               id="register-status-error"
@@ -254,6 +266,7 @@ export function EditGymForm({ gym }: EditGymFormProps) {
               className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <Button
+              variant="secondary"
               type="button"
               onClick={() => handleAutoSplit(pasteString)}
               className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-muted"

@@ -8,6 +8,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { usePolling } from "@/hooks/use-polling";
@@ -161,11 +162,12 @@ export function LiveAttendanceView({
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
         <div className="inline-flex max-w-full overflow-x-auto rounded-lg bg-muted p-1 text-xs">
           <Button
+            variant="ghost"
             type="button"
             onClick={() => setActiveTab("LIVE")}
             className={`apple-button-press flex flex-wrap items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "LIVE"
-                ? "bg-card text-foreground shadow-sm font-semibold"
+                ? "bg-card text-foreground shadow-sm font-semibold hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -174,11 +176,12 @@ export function LiveAttendanceView({
           </Button>
 
           <Button
+            variant="ghost"
             type="button"
             onClick={() => setActiveTab("MONTHLY")}
             className={`apple-button-press flex flex-wrap items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "MONTHLY"
-                ? "bg-card text-foreground shadow-sm font-semibold"
+                ? "bg-card text-foreground shadow-sm font-semibold hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -213,15 +216,18 @@ export function LiveAttendanceView({
                 className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:border-ring focus:outline-none"
               />
 
-              <select
+              <Combobox
+                aria-label="Filter attendance role"
                 value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as any)}
-                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:border-ring focus:outline-none"
-              >
-                <option value="ALL">All Roles</option>
-                <option value="CUSTOMER">Customers Only</option>
-                <option value="TRAINER">Trainers Only</option>
-              </select>
+                onValueChange={(value) => setSelectedRole(value as typeof selectedRole)}
+                options={[
+                  { value: "ALL", label: "All roles" },
+                  { value: "CUSTOMER", label: "Customers only" },
+                  { value: "TRAINER", label: "Trainers only" },
+                ]}
+                searchPlaceholder="Search roles…"
+                className="w-44 text-xs"
+              />
             </div>
           </div>
 

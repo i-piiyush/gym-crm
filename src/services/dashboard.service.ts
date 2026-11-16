@@ -1,4 +1,5 @@
 import prisma from "@/db/client";
+import { ensureSalaryRecordsForMonth, refreshPendingSalaryRecords } from "@/db/repositories/salary.repo";
 import { Prisma } from "@prisma/client";
 import { format, addDays } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
@@ -67,6 +68,8 @@ export async function getAdminDashboardStats(
   );
   const sevenDaysFromNow = addDays(now, 7);
   const twoDaysFromNow = addDays(now, 2);
+  await ensureSalaryRecordsForMonth(gymId, currentMonthStr);
+  await refreshPendingSalaryRecords(gymId, currentMonthStr);
 
   // ---------- Single SQL query using CTEs for ALL dashboard data (1 round-trip) ----------
   const statsRows = await prisma.$queryRaw<

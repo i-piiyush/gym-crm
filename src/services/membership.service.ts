@@ -3,6 +3,7 @@ import * as salaryRepo from "@/db/repositories/salary.repo";
 import prisma from "@/db/client";
 import { CustomerListItem } from "@/types/person.types";
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 export interface SubscriptionBuckets {
   expiringIn7Days: CustomerListItem[];
@@ -93,12 +94,14 @@ export async function runDailyCron() {
   // 2. Fetch active gyms and ensure salary records
   const activeGyms = await prisma.gym.findMany({
     where: { status: "ACTIVE" },
-    select: { id: true, name: true },
+    select: { id: true, name: true, timezone: true },
   });
 
   const payrollProcessedGyms: string[] = [];
   for (const gym of activeGyms) {
-    await salaryRepo.ensureSalaryRecordsForMonth(gym.id, currentMonth);
+    const gymMonth = formatInTimeZone(now, gym.timezone, "yyyy-MM");
+    await salaryRepo.ensureSalaryRecordsForMonth(gym.id, gymMonth);
+    await salaryRepo.refreshPendingSalaryRecords(gym.id);
     payrollProcessedGyms.push(gym.name);
   }
 

@@ -33,6 +33,7 @@ export async function getPeoplePageData(
          SELECT 
            u.id, u.name, u.email, u.phone, u.status,
            COALESCE(tp."monthlySalary", 0) AS "monthlySalary",
+           COALESCE(tp."holidayDeductionPerDay", 0) AS "holidayDeductionPerDay",
            COALESCE(tp."salaryDueDay", 1) AS "salaryDueDay",
            COALESCE(tp."joinedAt", u."createdAt") AS "joinedAt",
            (SELECT COUNT(*) FROM "CustomerProfile" cp WHERE cp."trainerId" = u.id) AS "assignedCustomersCount"
@@ -87,6 +88,7 @@ export async function getPeoplePageData(
     phone: t.phone,
     status: t.status,
     monthlySalary: Number(t.monthlySalary),
+    holidayDeductionPerDay: Number(t.holidayDeductionPerDay),
     salaryDueDay: Number(t.salaryDueDay),
     joinedAt: new Date(t.joinedAt),
     assignedCustomersCount: Number(t.assignedCustomersCount),
@@ -295,6 +297,7 @@ export async function addPerson(gymId: string, invitedById: string, input: AddPe
         trainerProfile: {
           create: {
             monthlySalary: new Prisma.Decimal(input.monthlySalary || 0),
+            holidayDeductionPerDay: new Prisma.Decimal(input.holidayDeductionPerDay),
             salaryDueDay: input.salaryDueDay || 1,
           },
         },

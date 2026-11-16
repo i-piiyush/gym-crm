@@ -24,6 +24,9 @@ erDiagram
     User ||--o{ CustomerProfile : "trains (as trainer)"
 
     TrainerProfile ||--o{ SalaryRecord : "receives"
+    TrainerProfile ||--o{ TrainerLeave : "takes"
+    Gym ||--o{ TrainerLeave : "records"
+    User ||--o{ TrainerLeave : "marks as admin"
 
     CustomerProfile }o--|| User : "assigned_trainer"
     CustomerProfile }o--o| MembershipPlan : "enrolled_in"
@@ -82,6 +85,7 @@ erDiagram
     TrainerProfile {
         string userId PK,FK
         decimal monthlySalary
+        decimal holidayDeductionPerDay
         int salaryDueDay
         datetime joinedAt
     }
@@ -138,8 +142,23 @@ erDiagram
         string trainerId FK
         string month
         decimal amount
+        decimal baseAmount
+        decimal holidayDeductionPerDay
+        int holidayDays
+        decimal deductionAmount
         enum status
         datetime paidAt
+    }
+
+    TrainerLeave {
+        string id PK
+        string gymId FK
+        string trainerId FK
+        string date
+        enum type
+        string reason
+        string markedById FK
+        datetime createdAt
     }
 
     Attendance {
@@ -204,8 +223,19 @@ Maintains strictly monotonic, yearly reset receipt counters per gym.
 
 ### 3.6 `SalaryRecord` & Payroll Idempotency
 - Unique compound constraint `@@unique([trainerId, month])` where `month` is formatted `YYYY-MM`.
-- `monthlySalary` snapshot stored in `amount` at record creation.
+- `monthlySalary` snapshot stored in `baseAmount` at record creation; `amount` is the net payable salary.
+- Completed gym-local days without an attendance record count toward `holidayDays`, starting at `TrainerProfile.joinedAt`. Today and future dates are excluded. Paid leave excuses absence; unpaid leave does not override a check-in.
+- Deduction is `min(baseAmount, holidayDays × holidayDeductionPerDay)`; net is `baseAmount − deductionAmount`. The default daily rate is zero.
+- Admin rate changes update the profile and pending records. Paid salary records keep their original base/rate/day/deduction/net snapshot.
+- Trainer-scoped transaction advisory locks serialize payroll creation, recalculation, rate edits, leave mutations, and marking paid. Payment also locks its row and checks the reviewed net amount before updating its status.
 - Created via idempotent `ensureSalaryRecordsForMonth(gymId, month)` using `createMany` with `skipDuplicates: true`.
+
+### 3.8 `TrainerLeave`
+- One row per gym-local leave date, unique on `(trainerId, date)`.
+- Gym admins mark inclusive date ranges as `PAID` or `UNPAID`, with an optional reason. Overlapping ranges replace the existing type/reason; removing leave recalculates pending salaries.
+- Leave cannot precede the joining date. Future leave is permitted. Editing or removing leave in a paid payroll month is rejected atomically, including ranges crossing month boundaries.
+- `markedById` comes from the authenticated admin session. All leave actions validate the trainer and gym boundary.
+- See [trainer payroll usage and verification](./TRAINER-PAYROLL.md).
 
 ### 3.7 `Attendance`
 - `date`: Local gym calendar date string in `YYYY-MM-DD` (adhering to `gym.timezone`, default `Asia/Kolkata`).

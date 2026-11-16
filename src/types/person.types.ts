@@ -8,6 +8,7 @@ export interface TrainerListItem {
   phone: string | null;
   status: (typeof UserStatus)[keyof typeof UserStatus];
   monthlySalary: number;
+  holidayDeductionPerDay: number;
   salaryDueDay: number;
   joinedAt: Date;
   assignedCustomersCount: number;

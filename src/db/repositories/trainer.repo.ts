@@ -1,6 +1,7 @@
 import prisma from "@/db/client";
 import { TrainerListItem, TrainerOption } from "@/types/person.types";
 import { Prisma } from "@prisma/client";
+import { ensureSalaryRecordsForMonth, refreshPendingSalaryRecords } from "./salary.repo";
 
 export async function listTrainers(gymId: string): Promise<TrainerListItem[]> {
   const users = await prisma.user.findMany({
@@ -26,6 +27,7 @@ export async function listTrainers(gymId: string): Promise<TrainerListItem[]> {
     phone: u.phone,
     status: u.status,
     monthlySalary: u.trainerProfile ? Number(u.trainerProfile.monthlySalary) : 0,
+    holidayDeductionPerDay: Number(u.trainerProfile?.holidayDeductionPerDay ?? 0),
     salaryDueDay: u.trainerProfile?.salaryDueDay ?? 1,
     joinedAt: u.trainerProfile?.joinedAt ?? u.createdAt,
     assignedCustomersCount: u._count.assignedCustomers,
@@ -143,6 +145,8 @@ export async function getTrainerPortalOverview(
   todayDateStr: string,
   currentMonthStr: string
 ) {
+  await ensureSalaryRecordsForMonth(gymId, currentMonthStr);
+  await refreshPendingSalaryRecords(gymId, undefined, trainerId);
   const rows = await prisma.$queryRaw<
     Array<{
       trainerProfile: {
@@ -165,6 +169,8 @@ export async function getTrainerPortalOverview(
       }>;
       currentSalary: {
         amount: number;
+        deductionAmount: number;
+        holidayDays: number;
         status: string;
         paidAt: string | Date | null;
       } | null;
@@ -216,10 +222,12 @@ export async function getTrainerPortalOverview(
         FROM (
           SELECT 
             "amount"::double precision AS "amount",
+            "deductionAmount"::double precision AS "deductionAmount",
+            "holidayDays",
             "status",
             "paidAt"
           FROM "SalaryRecord"
-          WHERE "trainerId" = ${trainerId} AND "month" = ${currentMonthStr}
+          WHERE "trainerId" = ${trainerId} AND "gymId" = ${gymId} AND "month" = ${currentMonthStr}
         ) sr_row
       ) AS "currentSalary",
       EXISTS(
@@ -257,6 +265,8 @@ export async function getTrainerPortalOverview(
     currentSalary: data.currentSalary
       ? {
           amount: Number(data.currentSalary.amount),
+          deductionAmount: Number(data.currentSalary.deductionAmount),
+          holidayDays: data.currentSalary.holidayDays,
           status: data.currentSalary.status,
           paidAt: data.currentSalary.paidAt ? new Date(data.currentSalary.paidAt) : null,
         }

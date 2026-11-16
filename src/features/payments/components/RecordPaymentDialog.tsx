@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   recordPaymentSchema,
@@ -16,6 +16,7 @@ import {
 } from "@/schemas/payment.schema";
 import { recordPaymentAction } from "@/actions/payment.actions";
 import { PressableButton } from "@/components/motion/PressableButton";
+import { Combobox } from "@/components/ui/combobox";
 import { PlanOption } from "@/types/person.types";
 import { toast } from "sonner";
 import {
@@ -63,6 +64,7 @@ export function RecordPaymentDialog({
   const {
     register,
     handleSubmit,
+    control,
     watch,
     reset,
     formState: { errors },
@@ -140,22 +142,33 @@ export function RecordPaymentDialog({
             >
               Select Customer <span className="text-destructive">*</span>
             </label>
-            <select
-              aria-invalid={!!errors.customerId}
-              aria-describedby={
-                errors.customerId ? "register-customerId-error" : undefined
-              }
-              id="register-customerId"
-              {...register("customerId")}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">Choose a member</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.email})
-                </option>
-              ))}
-            </select>
+            <Controller
+              name="customerId"
+              control={control}
+              render={({ field }) => (
+                <Combobox
+                  name={field.name}
+                  ref={field.ref}
+                  onBlur={field.onBlur}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  id="register-customerId"
+                  disabled={isSubmitting}
+                  aria-invalid={!!errors.customerId}
+                  aria-describedby={errors.customerId ? "register-customerId-error" : undefined}
+                  placeholder="Choose a member"
+                  searchPlaceholder="Search members…"
+                  emptyMessage="No members found."
+                  options={[
+                    { value: "", label: "Choose a member" },
+                    ...customers.map((customer) => ({
+                      value: customer.id,
+                      label: `${customer.name} (${customer.email})`,
+                    })),
+                  ]}
+                />
+              )}
+            />
             {errors.customerId && (
               <p
                 id="register-customerId-error"
@@ -175,23 +188,33 @@ export function RecordPaymentDialog({
             >
               Membership Plan <span className="text-destructive">*</span>
             </label>
-            <select
-              aria-invalid={!!errors.planId}
-              aria-describedby={
-                errors.planId ? "register-planId-error" : undefined
-              }
-              id="register-planId"
-              {...register("planId")}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">Choose a plan</option>
-              {plans.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.durationDays} days) — ₹
-                  {p.price.toLocaleString("en-IN")}
-                </option>
-              ))}
-            </select>
+            <Controller
+              name="planId"
+              control={control}
+              render={({ field }) => (
+                <Combobox
+                  name={field.name}
+                  ref={field.ref}
+                  onBlur={field.onBlur}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  id="register-planId"
+                  disabled={isSubmitting}
+                  aria-invalid={!!errors.planId}
+                  aria-describedby={errors.planId ? "register-planId-error" : undefined}
+                  placeholder="Choose a plan"
+                  searchPlaceholder="Search membership plans…"
+                  emptyMessage="No membership plans found."
+                  options={[
+                    { value: "", label: "Choose a plan" },
+                    ...plans.map((plan) => ({
+                      value: plan.id,
+                      label: `${plan.name} (${plan.durationDays} days) — ₹${plan.price.toLocaleString("en-IN")}`,
+                    })),
+                  ]}
+                />
+              )}
+            />
             {errors.planId && (
               <p
                 id="register-planId-error"

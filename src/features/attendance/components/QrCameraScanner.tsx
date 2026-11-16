@@ -488,7 +488,7 @@ export function QrCameraScanner({
               <button
                 type="button"
                 onClick={() => startCamera(currentCameraIndex)}
-                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 active:scale-95 transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-700 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800 hover:text-white active:scale-95 transition-all shadow-sm"
               >
                 <RefreshCw className="h-3 w-3" />
                 <span>Retry Camera</span>

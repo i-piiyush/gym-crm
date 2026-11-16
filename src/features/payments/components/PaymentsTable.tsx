@@ -8,6 +8,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 
 import { useEffect, useState } from "react";
 import { PaymentListItem } from "@/types/payment.types";
@@ -139,22 +140,23 @@ export function PaymentsTable({
             className="w-full rounded-full border border-border bg-card pl-9 pr-4 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors"
           />
         </div>
-        <select
+        <Combobox
           aria-label="Filter payment status"
           value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
+          onValueChange={(value) => {
+            setStatus(value);
             setPage(1);
           }}
-          className="rounded-lg border border-border bg-card px-3 text-xs"
-        >
-          <option value="ALL">All statuses</option>
-          {["PAID", "PENDING", "FAILED", "REFUNDED"].map((s) => (
-            <option key={s} value={s}>
-              {s.charAt(0) + s.slice(1).toLowerCase()}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: "ALL", label: "All statuses" },
+            ...["PAID", "PENDING", "FAILED", "REFUNDED"].map((status) => ({
+              value: status,
+              label: status.charAt(0) + status.slice(1).toLowerCase(),
+            })),
+          ]}
+          searchPlaceholder="Search payment statuses…"
+          className="w-40 text-xs"
+        />
         <span className="text-xs text-muted-foreground">
           Showing {filtered.length} of {payments.length} transactions
         </span>
@@ -272,6 +274,7 @@ export function PaymentsTable({
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Download PDF */}
                           <Button
+                            variant="outline"
                             type="button"
                             onClick={() => handleDownloadPdf(p.id)}
                             disabled={downloadingId === p.id}
@@ -288,6 +291,7 @@ export function PaymentsTable({
 
                           {/* Resend Email */}
                           <Button
+                            variant="ghost"
                             type="button"
                             onClick={() => handleResendEmail(p)}
                             disabled={resendingId === p.id}

@@ -8,8 +8,11 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { TrainerLeaveDialog } from "./TrainerLeaveDialog";
+import { HolidayRateDialog } from "@/features/salaries/components/HolidayRateDialog";
 import { TrainerListItem, TrainerOption } from "@/types/person.types";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -31,6 +34,9 @@ export function TrainersTable({
     useState<TrainerListItem | null>(null);
   const [reassignedTrainerId, setReassignedTrainerId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [leaveTrainer, setLeaveTrainer] = useState<TrainerListItem | null>(null);
+  const [rateTrainer, setRateTrainer] = useState<TrainerListItem | null>(null);
+  useEffect(() => { setTrainers(initialTrainers); }, [initialTrainers]);
 
   const availableReplacementTrainers = allTrainers.filter(
     (t) => t.id !== selectedTrainer?.id,
@@ -136,6 +142,9 @@ export function TrainersTable({
                       <div className="text-[11px] text-muted-foreground">
                         Due day {trainer.salaryDueDay} of month
                       </div>
+                      <Button variant="link" size="sm" type="button" className="h-auto px-0 py-1 text-xs" onClick={() => setRateTrainer(trainer)}>
+                        ₹{trainer.holidayDeductionPerDay.toLocaleString("en-IN")} / missed day · Edit
+                      </Button>
                     </TableCell>
 
                     <TableCell className="px-5 py-3.5">
@@ -153,12 +162,13 @@ export function TrainersTable({
                     </TableCell>
 
                     <TableCell className="px-5 py-3.5 text-right">
+                      <Button variant="outline" size="sm" type="button" className="mr-2" onClick={() => setLeaveTrainer(trainer)}>Manage leave</Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         type="button"
                         onClick={() => setSelectedTrainer(trainer)}
-                        className="apple-button-press inline-flex h-7 w-7 items-center justify-center rounded-lg text-status-danger-fg hover:bg-status-danger-bg"
+                        className="apple-button-press inline-flex h-7 w-7 items-center justify-center rounded-lg text-status-danger-fg hover:bg-status-danger-bg hover:text-status-danger-fg"
                         title="Remove Trainer"
                         aria-label={`Remove ${trainer.name}`}
                       >
@@ -172,6 +182,9 @@ export function TrainersTable({
           </TableBody>
         </Table>
       </div>
+
+      {leaveTrainer && <TrainerLeaveDialog trainer={leaveTrainer} onClose={() => setLeaveTrainer(null)} />}
+      {rateTrainer && <HolidayRateDialog trainerId={rateTrainer.id} trainerName={rateTrainer.name} rate={rateTrainer.holidayDeductionPerDay} onClose={() => setRateTrainer(null)} />}
 
       {/* Remove Trainer Confirmation Dialog */}
       {selectedTrainer && (
@@ -194,7 +207,7 @@ export function TrainersTable({
         >
           {selectedTrainer.assignedCustomersCount > 0 && (
             <div className="mt-4">
-              <label className="block text-xs font-medium text-foreground mb-1.5">
+              <label htmlFor="replacement-trainer" className="block text-xs font-medium text-foreground mb-1.5">
                 Transfer {selectedTrainer.assignedCustomersCount} Clients To:
               </label>
               {availableReplacementTrainers.length === 0 ? (
@@ -203,18 +216,23 @@ export function TrainersTable({
                   first before removing this coach.
                 </p>
               ) : (
-                <select
+                <Combobox
+                  id="replacement-trainer"
                   value={reassignedTrainerId}
-                  onChange={(e) => setReassignedTrainerId(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs text-foreground focus:border-ring focus:outline-none"
-                >
-                  <option value="">Select replacement trainer...</option>
-                  {availableReplacementTrainers.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name} ({t.email})
-                    </option>
-                  ))}
-                </select>
+                  onValueChange={setReassignedTrainerId}
+                  disabled={isLoading}
+                  placeholder="Select replacement trainer…"
+                  searchPlaceholder="Search trainers…"
+                  emptyMessage="No trainers found."
+                  options={[
+                    { value: "", label: "Select replacement trainer…" },
+                    ...availableReplacementTrainers.map((trainer) => ({
+                      value: trainer.id,
+                      label: `${trainer.name} (${trainer.email})`,
+                    })),
+                  ]}
+                  className="text-xs"
+                />
               )}
             </div>
           )}

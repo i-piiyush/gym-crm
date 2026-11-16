@@ -15,6 +15,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Pagination } from "@/components/shared/Pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Combobox } from "@/components/ui/combobox";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -137,22 +138,23 @@ export function CustomersTable({
           />
         </div>
         <div className="flex items-center gap-3">
-          <select
+          <Combobox
             aria-label="Filter membership status"
             value={filter}
-            onChange={(e) => {
-              setFilter(e.target.value);
+            onValueChange={(value) => {
+              setFilter(value);
               setPage(1);
             }}
-            className="rounded-lg border border-border bg-card px-3 text-xs"
-          >
-            <option value="ALL">All memberships</option>
-            {["ACTIVE", "TRIAL", "EXPIRED", "CANCELLED"].map((s) => (
-              <option key={s} value={s}>
-                {s.charAt(0) + s.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "ALL", label: "All memberships" },
+              ...["ACTIVE", "TRIAL", "EXPIRED", "CANCELLED"].map((status) => ({
+                value: status,
+                label: status.charAt(0) + status.slice(1).toLowerCase(),
+              })),
+            ]}
+            searchPlaceholder="Search membership statuses…"
+            className="w-44 text-xs"
+          />
           <span className="text-xs text-dim">{filtered.length} members</span>
         </div>
       </div>
@@ -259,7 +261,7 @@ export function CustomersTable({
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            className="text-destructive focus:bg-destructive/5"
+                            className="text-status-danger-fg focus:bg-status-danger-bg focus:text-status-danger-fg"
                             onSelect={() => setDeleting(c)}
                           >
                             <Trash2 />
@@ -319,19 +321,23 @@ export function CustomersTable({
         >
           Coach
         </label>
-        <select
+        <Combobox
           id="assign-coach"
           value={targetTrainerId}
-          onChange={(e) => setTargetTrainerId(e.target.value)}
-          className="w-full rounded-lg border border-border bg-card px-3 text-sm"
-        >
-          <option value="">Select a coach</option>
-          {trainers.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
+          onValueChange={setTargetTrainerId}
+          disabled={busy}
+          placeholder="Select a coach"
+          searchPlaceholder="Search coaches…"
+          emptyMessage="No coaches found."
+          options={[
+            { value: "", label: "Select a coach" },
+            ...trainers.map((trainer) => ({
+              value: trainer.id,
+              label: trainer.name,
+              keywords: [trainer.email],
+            })),
+          ]}
+        />
       </ConfirmDialog>
       <ConfirmDialog
         isOpen={!!deleting}

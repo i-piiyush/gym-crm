@@ -1,8 +1,8 @@
 import * as salaryRepo from "@/db/repositories/salary.repo";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
-export function getCurrentMonthString(date: Date = new Date()): string {
-  return format(date, "yyyy-MM");
+export function getCurrentMonthString(date: Date = new Date(), timezone = "Asia/Kolkata"): string {
+  return formatInTimeZone(date, timezone, "yyyy-MM");
 }
 
 export async function getSalariesForGymAndMonth(
@@ -13,8 +13,8 @@ export async function getSalariesForGymAndMonth(
   return salaryRepo.getSalariesOverviewOptimized(gymId, targetMonth);
 }
 
-export async function markSalaryPaid(gymId: string, salaryRecordId: string) {
-  return salaryRepo.markSalaryPaid(salaryRecordId, gymId);
+export async function markSalaryPaid(gymId: string, salaryRecordId: string, expectedAmount: number) {
+  return salaryRepo.markSalaryPaid(salaryRecordId, gymId, expectedAmount);
 }
 
 export async function getTrainerSalaries(trainerId: string) {

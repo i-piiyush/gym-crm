@@ -8,6 +8,10 @@ export interface SalaryRecordItem {
   trainerPhone: string | null;
   month: string;
   amount: number;
+  baseAmount: number;
+  holidayDeductionPerDay: number;
+  holidayDays: number;
+  deductionAmount: number;
   status: SalaryStatusType;
   paidAt: Date | null;
   salaryDueDay: number;
@@ -18,6 +22,7 @@ export interface SalaryOverview {
   totalSalaries: number;
   totalPending: number;
   totalPaid: number;
+  totalDeductions: number;
   records: SalaryRecordItem[];
 }
 

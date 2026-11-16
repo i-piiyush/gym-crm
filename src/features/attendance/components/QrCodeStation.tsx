@@ -119,6 +119,7 @@ export function QrCodeStation({
         </div>
 
         <Button
+          variant="outline"
           type="button"
           onClick={toggleFullscreen}
           className="apple-button-press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted"

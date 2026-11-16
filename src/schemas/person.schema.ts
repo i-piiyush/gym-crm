@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { emailSchema, phoneSchema, idSchema } from "./common.schema";
+import { salaryAmountSchema } from "./salary.schema";
 
 export const addPersonSchema = z
   .object({
@@ -9,7 +10,8 @@ export const addPersonSchema = z
     phone: phoneSchema,
 
     // Trainer specific fields
-    monthlySalary: z.number().min(0, "Salary cannot be negative").optional(),
+    monthlySalary: salaryAmountSchema.optional(),
+    holidayDeductionPerDay: salaryAmountSchema.optional().default(0),
     salaryDueDay: z.number().int().min(1).max(28).optional().default(1),
 
     // Customer specific fields

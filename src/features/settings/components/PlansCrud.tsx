@@ -252,6 +252,7 @@ export function PlansCrud({ initialPlans }: PlansCrudProps) {
                   </div>
 
                   <Button
+                    variant="ghost"
                     onClick={() => handleToggleActive(plan)}
                     disabled={!!togglingPlan}
                     title={
@@ -261,18 +262,18 @@ export function PlansCrud({ initialPlans }: PlansCrudProps) {
                     }
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium border transition-colors ${
                       plan.isActive
-                        ? "border-status-active-fg/20 bg-honeydew text-status-active-fg"
+                        ? "border-status-active-fg/20 bg-honeydew text-status-active-fg hover:bg-honeydew/80 hover:text-status-active-fg"
                         : "border-border bg-background text-dim"
                     }`}
                   >
                     {plan.isActive ? (
                       <>
-                        <CheckCircle2 className="h-3 w-3 text-status-active-fg" />
+                        <CheckCircle2 className="h-3 w-3" />
                         <span>Active</span>
                       </>
                     ) : (
                       <>
-                        <XCircle className="h-3 w-3 text-dim" />
+                        <XCircle className="h-3 w-3" />
                         <span>Inactive</span>
                       </>
                     )}
@@ -291,6 +292,7 @@ export function PlansCrud({ initialPlans }: PlansCrudProps) {
                 </div>
 
                 <Button
+                  variant="outline"
                   onClick={() => handleOpenEdit(plan)}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-foreground hover:bg-surface active:scale-[0.98] transition-all"
                 >
@@ -442,6 +444,7 @@ export function PlansCrud({ initialPlans }: PlansCrudProps) {
               )}
               <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/50">
                 <Button
+                  variant="outline"
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
                   className="rounded-full border border-border/80 bg-background px-4 py-2 text-xs font-medium text-foreground hover:bg-surface active:scale-[0.98] transition-all"
@@ -600,6 +603,7 @@ export function PlansCrud({ initialPlans }: PlansCrudProps) {
               )}
               <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/50">
                 <Button
+                  variant="outline"
                   type="button"
                   onClick={() => setEditingPlan(null)}
                   className="rounded-full border border-border/80 bg-background px-4 py-2 text-xs font-medium text-foreground hover:bg-surface active:scale-[0.98] transition-all"

@@ -148,11 +148,12 @@ export function PeopleView({
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
         <div className="inline-flex max-w-full overflow-x-auto rounded-lg bg-muted p-1 text-xs">
           <Button
+            variant="ghost"
             type="button"
             onClick={() => setActiveTab("CUSTOMERS")}
             className={`apple-button-press flex flex-wrap items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "CUSTOMERS"
-                ? "bg-card text-foreground shadow-sm font-semibold"
+                ? "bg-card text-foreground shadow-sm font-semibold hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -161,11 +162,12 @@ export function PeopleView({
           </Button>
 
           <Button
+            variant="ghost"
             type="button"
             onClick={() => setActiveTab("TRAINERS")}
             className={`apple-button-press flex flex-wrap items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "TRAINERS"
-                ? "bg-card text-foreground shadow-sm font-semibold"
+                ? "bg-card text-foreground shadow-sm font-semibold hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -174,11 +176,12 @@ export function PeopleView({
           </Button>
 
           <Button
+            variant="ghost"
             type="button"
             onClick={() => setActiveTab("INVITES")}
             className={`apple-button-press flex flex-wrap items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "INVITES"
-                ? "bg-card text-foreground shadow-sm font-semibold"
+                ? "bg-card text-foreground shadow-sm font-semibold hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -240,9 +243,10 @@ export function PeopleView({
                       </TableCell>
                       <TableCell className="px-5 py-3.5 text-right">
                         <Button
+                          variant="ghost"
                           type="button"
                           onClick={() => setRevoking(inv.id)}
-                          className="apple-button-press inline-flex items-center gap-1 rounded-full border border-rose-200 bg-status-danger-bg px-2.5 py-1 text-[11px] font-medium text-status-danger-fg hover:bg-status-danger-bg"
+                        className="apple-button-press inline-flex items-center gap-1 rounded-full border border-rose-200 bg-status-danger-bg px-2.5 py-1 text-[11px] font-medium text-status-danger-fg hover:bg-status-danger-bg hover:text-status-danger-fg"
                         >
                           <Trash2 className="h-3 w-3" />
                           <span>Revoke</span>

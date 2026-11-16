@@ -2,6 +2,7 @@
 import { useId, useState } from "react";
 import type { DashboardInsights } from "@/services/insights.service";
 import { cn } from "@/lib/utils";
+import { Combobox } from "@/components/ui/combobox";
 export function AttendanceChart({
   data,
   title = "Attendance overview",
@@ -24,15 +25,19 @@ export function AttendanceChart({
             {total.toLocaleString()} check-ins {periodLabel ? "over this period" : `in the last ${range} days`}
           </p>
         </div>
-        {!periodLabel && <select
-          aria-label="Attendance date range"
-          value={range}
-          onChange={(e) => setRange(Number(e.target.value))}
-          className="max-w-28 rounded-lg border border-border bg-card px-2 text-xs"
-        >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-        </select>}
+        {!periodLabel && (
+          <Combobox
+            aria-label="Attendance date range"
+            value={String(range)}
+            onValueChange={(value) => setRange(Number(value))}
+            options={[
+              { value: "7", label: "Last 7 days" },
+              { value: "30", label: "Last 30 days" },
+            ]}
+            searchPlaceholder="Search date ranges…"
+            className="w-32 text-xs"
+          />
+        )}
       </div>
       <div className="relative mt-7">
         <div className="absolute inset-x-0 top-0 bottom-6 flex flex-col justify-between">

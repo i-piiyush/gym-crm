@@ -146,17 +146,26 @@ export function Sidebar({
       <div className="border-t border-border p-3">
         <div
           className={cn(
-            "flex items-center gap-2.5 px-2 py-2",
+            "flex min-w-0 items-center gap-2.5 px-2 py-2",
             collapsed && "justify-center px-0",
           )}
         >
-          <UserButton appearance={{ elements: { avatarBox: "size-8" } }} />
+          <div className="flex size-8 shrink-0 items-center justify-center">
+            <UserButton
+              appearance={{
+                elements: {
+                  rootBox: "w-auto shrink-0",
+                  avatarBox: "size-8",
+                },
+              }}
+            />
+          </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-medium">
                 {userName || "Your account"}
               </p>
-              <p className="mt-0.5 text-[10px] text-dim">
+              <p className="mt-0.5 truncate text-[10px] text-dim">
                 Account & preferences
               </p>
             </div>

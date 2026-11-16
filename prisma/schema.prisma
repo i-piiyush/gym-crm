@@ -71,6 +71,11 @@ enum SalaryStatus {
   PENDING
 }
 
+enum TrainerLeaveType {
+  PAID
+  UNPAID
+}
+
 // -----------------------------------------------------------------------------
 // MODELS
 // -----------------------------------------------------------------------------
@@ -100,6 +105,7 @@ model Gym {
   receiptDeliveries ReceiptDelivery[]
   salaryRecords     SalaryRecord[]
   attendances       Attendance[]
+  trainerLeaves     TrainerLeave[]
 
   @@index([status])
   @@index([pendingOwnerEmail])
@@ -123,6 +129,7 @@ model User {
   assignedCustomers        CustomerProfile[] @relation("TrainerToCustomers")
   attendances              Attendance[]
   invitationsCreated       Invitation[]      @relation("InvitedByUser")
+  trainerLeavesMarked       TrainerLeave[]    @relation("TrainerLeavesMarked")
 
   @@index([gymId])
   @@index([role])
@@ -155,12 +162,32 @@ model Invitation {
 model TrainerProfile {
   userId        String         @id
   monthlySalary Decimal        @db.Decimal(10, 2)
+  holidayDeductionPerDay Decimal @default(0) @db.Decimal(10, 2)
   salaryDueDay  Int            @default(1) // Day of month (1-28)
   joinedAt      DateTime       @default(now())
 
   // Relations
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   salaryRecords SalaryRecord[]
+  leaves        TrainerLeave[]
+}
+
+model TrainerLeave {
+  id         String           @id @default(cuid())
+  gymId      String
+  trainerId  String
+  date       String           // Gym-local YYYY-MM-DD
+  type       TrainerLeaveType @default(UNPAID)
+  reason     String?
+  markedById String?
+  createdAt  DateTime         @default(now())
+
+  gym      Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  trainer  TrainerProfile @relation(fields: [trainerId], references: [userId], onDelete: Cascade)
+  markedBy User?          @relation("TrainerLeavesMarked", fields: [markedById], references: [id], onDelete: SetNull)
+
+  @@unique([trainerId, date])
+  @@index([gymId, date])
 }
 
 model CustomerProfile {
@@ -270,7 +297,11 @@ model SalaryRecord {
   gymId     String
   trainerId String
   month     String       // Format YYYY-MM
-  amount    Decimal      @db.Decimal(10, 2) // Snapshotted from trainerProfile.monthlySalary
+  amount    Decimal      @db.Decimal(10, 2) // Net payable salary after holiday deductions
+  baseAmount Decimal?    @db.Decimal(10, 2) // Monthly salary snapshot; nullable for legacy imports
+  holidayDeductionPerDay Decimal @default(0) @db.Decimal(10, 2)
+  holidayDays Int        @default(0)
+  deductionAmount Decimal @default(0) @db.Decimal(10, 2)
   status    SalaryStatus @default(PENDING)
   paidAt    DateTime?
 

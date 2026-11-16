@@ -174,6 +174,7 @@ export function CustomerPaymentsTable({
 
                       <TableCell className="px-6 py-4 text-right">
                         <Button
+                          variant="outline"
                           onClick={() => handleDownload(p.id)}
                           disabled={isDownloading}
                           className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted  disabled:opacity-50 transition-colors shadow-sm"

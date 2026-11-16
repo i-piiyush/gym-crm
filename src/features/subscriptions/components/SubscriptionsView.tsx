@@ -132,7 +132,7 @@ export function SubscriptionsView({ buckets, plans }: SubscriptionsViewProps) {
             onClick={() => setActiveTab("7DAYS")}
             className={`apple-button-press flex items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "7DAYS"
-                ? "bg-card text-status-warning-fg shadow-sm font-semibold"
+                ? "bg-card text-status-warning-fg shadow-sm font-semibold hover:bg-card hover:text-status-warning-fg"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -147,7 +147,7 @@ export function SubscriptionsView({ buckets, plans }: SubscriptionsViewProps) {
             onClick={() => setActiveTab("15DAYS")}
             className={`apple-button-press flex items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "15DAYS"
-                ? "bg-card text-foreground shadow-sm font-semibold"
+                ? "bg-card text-foreground shadow-sm font-semibold hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -162,7 +162,7 @@ export function SubscriptionsView({ buckets, plans }: SubscriptionsViewProps) {
             onClick={() => setActiveTab("30DAYS")}
             className={`apple-button-press flex items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "30DAYS"
-                ? "bg-card text-foreground shadow-sm font-semibold"
+                ? "bg-card text-foreground shadow-sm font-semibold hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -177,7 +177,7 @@ export function SubscriptionsView({ buckets, plans }: SubscriptionsViewProps) {
             onClick={() => setActiveTab("EXPIRED")}
             className={`apple-button-press flex items-center gap-2 rounded-full px-4 py-1.5 font-medium transition-all ${
               activeTab === "EXPIRED"
-                ? "bg-card text-status-danger-fg shadow-sm font-semibold"
+                ? "bg-card text-status-danger-fg shadow-sm font-semibold hover:bg-card hover:text-status-danger-fg"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >

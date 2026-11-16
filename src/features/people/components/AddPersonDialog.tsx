@@ -1,6 +1,7 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -76,6 +77,7 @@ export function AddPersonDialog({
       emailReceipt: true,
       monthlySalary: 30000,
       salaryDueDay: 1,
+      holidayDeductionPerDay: 0,
     },
   });
 
@@ -143,22 +145,24 @@ export function AddPersonDialog({
         {/* Role Toggle */}
         <div className="mt-5 flex rounded-xl bg-muted p-1  border border-border">
           <Button
+            variant="ghost"
             type="button"
             onClick={() => handleRoleChange("CUSTOMER")}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
               selectedRole === "CUSTOMER"
-                ? "bg-card text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Customer
           </Button>
           <Button
+            variant="ghost"
             type="button"
             onClick={() => handleRoleChange("TRAINER")}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
               selectedRole === "TRAINER"
-                ? "bg-card text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm hover:bg-card"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -289,6 +293,8 @@ export function AddPersonDialog({
                   type="number"
                   placeholder="35000"
                   min={0}
+                  max={99999999.99}
+                  step="0.01"
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 {errors.monthlySalary && (
@@ -337,6 +343,12 @@ export function AddPersonDialog({
                   </p>
                 )}
               </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="register-holiday-rate" className="mb-1 block text-sm font-medium text-foreground">Deduction per day without a check-in (₹)</label>
+                <Input id="register-holiday-rate" type="number" min={0} max={99999999.99} step="0.01" {...register("holidayDeductionPerDay", { valueAsNumber: true })} aria-invalid={!!errors.holidayDeductionPerDay} aria-describedby={errors.holidayDeductionPerDay ? "register-holiday-rate-error" : "register-holiday-rate-help"} />
+                <p id="register-holiday-rate-help" className="mt-1 text-xs text-muted-foreground">₹0 disables deductions. Paid leave is excluded; only completed days are counted.</p>
+                {errors.holidayDeductionPerDay && <p id="register-holiday-rate-error" role="alert" className="mt-1 text-xs text-destructive">{errors.holidayDeductionPerDay.message}</p>}
+              </div>
             </div>
           )}
 
@@ -357,22 +369,33 @@ export function AddPersonDialog({
                     enrolling customers.
                   </div>
                 ) : (
-                  <select
-                    aria-invalid={!!errors.trainerId}
-                    aria-describedby={
-                      errors.trainerId ? "register-trainerId-error" : undefined
-                    }
-                    id="register-trainerId"
-                    {...register("trainerId")}
-                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  >
-                    <option value="">Select an active trainer</option>
-                    {trainerOptions.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name} ({t.email})
-                      </option>
-                    ))}
-                  </select>
+                  <Controller
+                    name="trainerId"
+                    control={control}
+                    render={({ field }) => (
+                      <Combobox
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                        id="register-trainerId"
+                        disabled={isSubmitting}
+                        aria-invalid={!!errors.trainerId}
+                        aria-describedby={errors.trainerId ? "register-trainerId-error" : undefined}
+                        placeholder="Select an active trainer"
+                        searchPlaceholder="Search trainers…"
+                        emptyMessage="No trainers found."
+                        options={[
+                          { value: "", label: "Select an active trainer" },
+                          ...trainerOptions.map((trainer) => ({
+                            value: trainer.id,
+                            label: `${trainer.name} (${trainer.email})`,
+                          })),
+                        ]}
+                      />
+                    )}
+                  />
                 )}
                 {errors.trainerId && (
                   <p
@@ -436,23 +459,33 @@ export function AddPersonDialog({
                   >
                     Initial Membership Plan (Optional)
                   </label>
-                  <select
-                    aria-invalid={!!errors.planId}
-                    aria-describedby={
-                      errors.planId ? "register-planId-error" : undefined
-                    }
-                    id="register-planId"
-                    {...register("planId")}
-                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  >
-                    <option value="">Select a membership plan</option>
-                    {plans.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.durationDays} days) - ₹
-                        {p.price.toLocaleString("en-IN")}
-                      </option>
-                    ))}
-                  </select>
+                  <Controller
+                    name="planId"
+                    control={control}
+                    render={({ field }) => (
+                      <Combobox
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                        id="register-planId"
+                        disabled={isSubmitting}
+                        aria-invalid={!!errors.planId}
+                        aria-describedby={errors.planId ? "register-planId-error" : undefined}
+                        placeholder="Select a membership plan"
+                        searchPlaceholder="Search membership plans…"
+                        emptyMessage="No membership plans found."
+                        options={[
+                          { value: "", label: "No initial membership plan" },
+                          ...plans.map((plan) => ({
+                            value: plan.id,
+                            label: `${plan.name} (${plan.durationDays} days) — ₹${plan.price.toLocaleString("en-IN")}`,
+                          })),
+                        ]}
+                      />
+                    )}
+                  />
                 </div>
               )}
 

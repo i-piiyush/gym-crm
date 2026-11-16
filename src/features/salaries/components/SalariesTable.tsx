@@ -12,9 +12,10 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { SalaryRecordItem, SalaryOverview } from "@/types/salary.types";
 import { markSalaryPaidAction } from "@/actions/salary.actions";
+import { HolidayRateDialog } from "./HolidayRateDialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { toast } from "sonner";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   CreditCard,
   Calendar,
@@ -36,15 +37,15 @@ export function SalariesTable({
   currentMonth,
 }: SalariesTableProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [overview, setOverview] = useState<SalaryOverview>(initialOverview);
   const [search, setSearch] = useState("");
   useEffect(() => {
     setOverview(initialOverview);
   }, [initialOverview]);
   const [markingId, setMarkingId] = useState<string | null>(null);
+  const [editingRecord, setEditingRecord] = useState<SalaryRecordItem | null>(null);
 
-  const selectedMonth = searchParams.get("month") || currentMonth;
+  const selectedMonth = overview.month || currentMonth;
 
   const filteredRecords = overview.records.filter((r) => {
     const q = search.toLowerCase();
@@ -55,31 +56,36 @@ export function SalariesTable({
   });
 
   const handleMonthChange = (newMonth: string) => {
+    if (!newMonth || markingId) return;
     router.push(`/admin/salaries?month=${newMonth}`);
   };
 
   const handleMarkPaid = async (record: SalaryRecordItem) => {
+    if (markingId || editingRecord) return;
     setMarkingId(record.id);
     try {
-      const res = await markSalaryPaidAction({ salaryRecordId: record.id });
+      const res = await markSalaryPaidAction({ salaryRecordId: record.id, expectedAmount: record.amount });
       if (!res.success) {
         toast.error(res.error || "Failed to mark salary as paid.");
+        router.refresh();
         return;
       }
 
       toast.success(
-        `Disbursed salary of ₹${record.amount.toLocaleString("en-IN")} to ${record.trainerName}`,
+        `Recorded paid salary of ₹${res.data.amount.toLocaleString("en-IN")} for ${record.trainerName}`,
       );
-      setOverview((prev) => ({
-        ...prev,
-        totalPaid: prev.totalPaid + record.amount,
-        totalPending: Math.max(0, prev.totalPending - record.amount),
-        records: prev.records.map((r) =>
-          r.id === record.id ? { ...r, status: "PAID", paidAt: new Date() } : r,
-        ),
-      }));
+      const paidRecord = res.data;
+      setOverview((prev) => {
+        const records = prev.records.map((r): SalaryRecordItem => r.id === paidRecord.id ? { ...r, ...paidRecord } : r);
+        const totalPaid = records.filter((r) => r.status === "PAID").reduce((sum, r) => sum + Math.round(r.amount * 100), 0) / 100;
+        const totalPending = records.filter((r) => r.status === "PENDING").reduce((sum, r) => sum + Math.round(r.amount * 100), 0) / 100;
+        return { ...prev, records, totalPaid, totalPending, totalSalaries: (Math.round(totalPaid * 100) + Math.round(totalPending * 100)) / 100,
+          totalDeductions: records.reduce((sum, r) => sum + Math.round(r.deductionAmount * 100), 0) / 100 };
+      });
+      router.refresh();
     } catch {
       toast.error("An error occurred while updating salary status.");
+      router.refresh();
     } finally {
       setMarkingId(null);
     }
@@ -90,7 +96,12 @@ export function SalariesTable({
       {/* -------------------------------------------------------------------- */}
       {/* 3 PAYROLL METRIC CARDS */}
       {/* -------------------------------------------------------------------- */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="apple-card p-5">
+          <span className="text-xs font-medium text-muted-foreground">Salary Deductions</span>
+          <p className="mt-2 text-2xl font-semibold font-mono text-foreground tabular-nums">₹{overview.totalDeductions.toLocaleString("en-IN")}</p>
+          <span className="text-[11px] text-muted-foreground">Missed check-ins, excluding paid leave</span>
+        </div>
         {/* Total Payroll */}
         <div className="apple-card p-5">
           <div className="flex items-center justify-between">
@@ -146,6 +157,7 @@ export function SalariesTable({
           </span>
         </div>
       </div>
+      <p className="text-xs text-muted-foreground">Deductions count every completed gym-local day without a check-in from the trainer’s joining date, including weekends. Today, future days, and paid leave are excluded. Paid salary statements are locked.</p>
 
       {/* -------------------------------------------------------------------- */}
       {/* FILTER & MONTH SELECTOR TOOLBAR */}
@@ -168,6 +180,8 @@ export function SalariesTable({
           </label>
           <input
             type="month"
+            aria-label="Payroll month"
+            disabled={!!markingId}
             value={selectedMonth}
             onChange={(e) => handleMonthChange(e.target.value)}
             className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:border-ring focus:outline-none"
@@ -188,7 +202,10 @@ export function SalariesTable({
                 <TableHead className="px-5 py-3.5">
                   Disbursement Due Day
                 </TableHead>
-                <TableHead className="px-5 py-3.5">Monthly Salary</TableHead>
+                <TableHead className="px-5 py-3.5">Base Salary</TableHead>
+                <TableHead className="px-5 py-3.5">Missed Days / Rate</TableHead>
+                <TableHead className="px-5 py-3.5">Deduction</TableHead>
+                <TableHead className="px-5 py-3.5">Payable Salary</TableHead>
                 <TableHead className="px-5 py-3.5">Status</TableHead>
                 <TableHead className="px-5 py-3.5 text-right">
                   Actions
@@ -199,7 +216,7 @@ export function SalariesTable({
               {filteredRecords.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={9}
                     className="px-6 py-12 text-center text-muted-foreground"
                   >
                     {search
@@ -250,6 +267,11 @@ export function SalariesTable({
                         </div>
                       </TableCell>
 
+                      <TableCell className="px-5 py-3.5 font-mono text-xs text-foreground tabular-nums">₹{r.baseAmount.toLocaleString("en-IN")}</TableCell>
+                      <TableCell className="px-5 py-3.5 text-xs text-foreground">
+                        <p>{r.holidayDays} day(s)</p><p className="text-muted-foreground">₹{r.holidayDeductionPerDay.toLocaleString("en-IN")} / day</p>
+                      </TableCell>
+                      <TableCell className="px-5 py-3.5 font-mono text-xs text-foreground tabular-nums">−₹{r.deductionAmount.toLocaleString("en-IN")}</TableCell>
                       <TableCell className="px-5 py-3.5 font-mono text-xs font-semibold text-foreground tabular-nums">
                         ₹{r.amount.toLocaleString("en-IN")}
                       </TableCell>
@@ -266,6 +288,7 @@ export function SalariesTable({
                       </TableCell>
 
                       <TableCell className="px-5 py-3.5 text-right">
+                        {r.status === "PENDING" && <Button type="button" size="sm" variant="outline" className="mr-2" disabled={!!markingId} onClick={() => setEditingRecord(r)}>Edit rate</Button>}
                         {r.status === "PAID" ? (
                           <span className="text-[11px] font-mono text-muted-foreground">
                             Paid{" "}
@@ -277,7 +300,7 @@ export function SalariesTable({
                           <Button
                             type="button"
                             onClick={() => handleMarkPaid(r)}
-                            disabled={markingId === r.id}
+                            disabled={!!markingId}
                             className="apple-button-press inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground shadow-sm hover:bg-primary/85"
                           >
                             {markingId === r.id ? (
@@ -297,6 +320,7 @@ export function SalariesTable({
           </Table>
         </div>
       </div>
+      {editingRecord && <HolidayRateDialog trainerId={editingRecord.trainerId} trainerName={editingRecord.trainerName} rate={editingRecord.holidayDeductionPerDay} record={editingRecord} onClose={() => setEditingRecord(null)} />}
     </div>
   );
 }

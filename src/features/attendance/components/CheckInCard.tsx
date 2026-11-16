@@ -340,6 +340,7 @@ export function CheckInCard({
               </Button>
 
               <Button
+                variant="outline"
                 type="button"
                 onClick={handleReset}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-border/80 bg-background py-2.5 text-xs font-medium text-foreground hover:bg-surface active:scale-[0.98] transition-all"
@@ -377,6 +378,7 @@ export function CheckInCard({
 
             <div className="mt-5 flex items-center justify-center gap-3">
               <Button
+                variant="destructive"
                 type="button"
                 onClick={handleReset}
                 className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-rose-700 active:scale-[0.98] transition-all shadow-sm"
@@ -386,12 +388,13 @@ export function CheckInCard({
               </Button>
 
               <Button
+                variant="outline"
                 type="button"
                 onClick={() => {
                   setCheckInError(null);
                   setActiveTab("MANUAL");
                 }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-card px-4 py-2.5 text-xs font-medium text-status-danger-fg hover:bg-status-danger-bg transition-all"
+                className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-card px-4 py-2.5 text-xs font-medium text-status-danger-fg hover:bg-status-danger-bg hover:text-status-danger-fg transition-all"
               >
                 <Keyboard className="h-3.5 w-3.5" />
                 <span>Manual Entry</span>
@@ -441,11 +444,12 @@ export function CheckInCard({
           {/* Mode Switcher Tabs (Paytm Camera vs Manual) */}
           <div className="mt-4 flex rounded-xl bg-muted p-1 text-xs">
             <Button
+              variant="ghost"
               type="button"
               onClick={() => setActiveTab("CAMERA")}
               className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-1.5 font-medium transition-all ${
                 activeTab === "CAMERA"
-                  ? "bg-card text-foreground shadow-sm"
+                  ? "bg-card text-foreground shadow-sm hover:bg-card"
                   : "text-dim hover:text-foreground"
               }`}
             >
@@ -454,11 +458,12 @@ export function CheckInCard({
             </Button>
 
             <Button
+              variant="ghost"
               type="button"
               onClick={() => setActiveTab("MANUAL")}
               className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-1.5 font-medium transition-all ${
                 activeTab === "MANUAL"
-                  ? "bg-card text-foreground shadow-sm"
+                  ? "bg-card text-foreground shadow-sm hover:bg-card"
                   : "text-dim hover:text-foreground"
               }`}
             >
@@ -537,6 +542,7 @@ export function CheckInCard({
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     <Button
+                      variant="outline"
                       type="button"
                       onClick={() => applyPreset("AT_GYM")}
                       className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors shadow-xs"
@@ -544,6 +550,7 @@ export function CheckInCard({
                       At Entrance (0m)
                     </Button>
                     <Button
+                      variant="outline"
                       type="button"
                       onClick={() => applyPreset("60M_AWAY")}
                       className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors shadow-xs"
@@ -551,6 +558,7 @@ export function CheckInCard({
                       60m Away (Reject)
                     </Button>
                     <Button
+                      variant="outline"
                       type="button"
                       onClick={() => applyPreset("5KM_AWAY")}
                       className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors shadow-xs"
@@ -558,6 +566,7 @@ export function CheckInCard({
                       5km Away (Reject)
                     </Button>
                     <Button
+                      variant="outline"
                       type="button"
                       onClick={() => applyPreset("WEAK_ACCURACY")}
                       className="rounded-xl border border-border bg-card px-3 py-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors shadow-xs"

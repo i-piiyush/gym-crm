@@ -260,6 +260,7 @@ export function CreateGymForm() {
               className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <Button
+              variant="secondary"
               type="button"
               onClick={() => handleAutoSplit(pasteString)}
               className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-muted"
